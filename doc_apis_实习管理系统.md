@@ -1,0 +1,911 @@
+* [公共部分](#公共部分)  
+    + [登录](#1登录)
+    + [注册](#2注册)  
+    + [退出登录](#3退出登录) 
+* [管理员部分和二级学院部分](#管理员部分和二级学院部分)  
+    + [添加或编辑用户](#1添加或编辑用户)
+    + [获取用户列表](#2获取用户列表)  
+    + [删除用户接口](#3删除用户接口) 
+    + [获取学院列表](#4获取学院列表)  
+    + [获取专业列表](#5获取专业列表)
+    + [获取班级列表](#6获取班级列表)  
+    + [添加或编辑班级](#7添加或编辑班级) 
+    + [添加或编辑专业](#8添加或编辑专业) 
+    + [删除学院、专业、班级](#9删除学院、专业、班级) 
+    + [获取老师信息列表](#10获取老师信息列表)  
+    + [获取老师管理的班级列表](#11获取老师管理的班级列表)  
+    + [删除老师管理的班级信息](#12删除老师管理的班级信息)
+    + [分配班级](#13分配班级)  
+    + [获取学生信息列表 ](#14获取学生信息列表) 
+    + [获取文件列表](#15获取文件列表) 
+    + [上传文件](#16上传文件)  
+    + [编辑文件](#17编辑文件)  
+    + [文件删除](#18文件删除)
+    + [文件预览](#19文件预览)  
+    + [获取老师发布任务记录](#20获取老师发布任务记录) 
+    + [获取学生成绩评定记录](#21获取学生成绩评定记录)  
+    + [删除记录](#22删除记录) 
+    + [文件下载](#23文件下载)  
+    + [获取批阅查看列表](#24获取批阅查看列表)  
+* [老师部分](#老师部分)  
+    + [获取学生列表](#1获取学生列表)
+    + [获取发布任务中的任务列表 ](#2获取发布任务中的任务列表)  
+    + [下载文件](#3下载文件) 
+    + [发布任务](#4发布任务)  
+    + [获取老师发布任务记录](#5获取老师发布任务记录)
+    + [获取批阅查看列表](#6获取批阅查看列表)  
+    + [批阅实习表](#7批阅实习表) 
+* [学生部分](#学生部分)
+    
+# 公共部分   
+## 1.登录 
+
+请求地址：POST {domain}/api/system/management/login  
+请求参数：
+```json
+{
+    "username": "jiangliang",
+    "password": "123456"
+}
+```
+
+返回数据  
+```json
+{
+    "status": 200, //200:成功，400：业务异常，例如参数不合法，401：未登录，500：系统内部错误
+    "message": "success",
+    "data": {
+       "loginStatus": 0,
+       "userId": 12,
+       "username": "姜良",
+       "type": 1,//用户类型：1：学生，2：老师，3：二级学院，0：超级管理员
+       "Authentication": "jiangliang a213354114ac47cb2f976aca8c956eef7b0c1d76" 
+    }
+}
+```   
+
+### 结果字段说明
+
+|字段|类型|说明|
+|:---|:---|:---|
+|status|int|0是登录成功，1：登录失败,登录失败时提示，用户名或密码不正确|
+|Authentication|string|生成的token，拿到token后，存入local Storage，前端每次请求后端接口的时候，将token放入header中|  
+
+## 2.注册 
+
+请求地址：POST {domain}/api/system/management/register  
+请求参数：
+```json
+{
+    "username": "jiangliang",
+    "password": "123456",
+    "type": 1 ,//用户类型：1：学生，2：老师
+    "name": "姜良" ,//昵称
+    "phone": 13178906573, //联系方式
+    "sex": 0 //0:男，1:女
+}
+```
+
+返回数据  
+```json
+{
+    "status": 200,
+    "message": "success",
+    "data": {}
+}
+```   
+
+## 3.退出登录 
+
+请求地址：POST {domain}/api/system/management/logout  
+请求参数：
+```json
+{
+    "username": "jiangliang"
+}
+```
+
+返回数据  
+```json
+{
+    "status": 200,
+    "message": "success",
+    "data": {}
+}
+```   
+
+
+# 管理员部分和二级学院部分   
+## 1.添加或编辑用户 
+
+请求地址：POST {domain}/api/system/management/user/add  
+请求参数：
+```json
+{
+    "operatorType": 0, //0:添加，1：编辑
+    "userType": 3, //0:管理员，3：二级学院
+    "username": "jiangliang",//账号
+    "name": "姜良",//昵称
+    "password": "123456", //密码
+    "description": "备注"
+}
+```
+返回数据  
+```json
+{
+    "status": 200,
+    "message": "success",
+    "data": {}
+}
+```   
+
+## 2.获取用户列表 
+
+请求地址：GET {domain}/api/system/management/user/list  
+请求参数：
+
+|字段|类型|必选|说明|
+|:---|:---|:---|:---|
+|pageNo|int|否|默认为1|
+|pageSize|int|否|默认为20| 
+|search|string|否|用户账号或者昵称|
+
+返回数据  
+```json
+{
+    "status": 200,
+    "message": "success",
+    "data": {
+        "total": 20,
+        "list": [
+            {
+                "userId": 1,
+                "userType": 3,
+                "username": "jsjxy",
+                "name": "计算机学院",
+                "description": "备注",
+                "createTime": 1611718548643
+            }            
+        ]
+    }
+}
+```   
+
+### 结果字段说明
+
+|字段|类型|说明|
+|:---|:---|:---|
+|userId|long|用户ID|
+|userType|int|用户类型：1：学生，2：老师，3：学院，0：超级管理员| 
+|username|string|账号| 
+|name|string|昵称|
+|description|string|备注| 
+|createTime|long|录入时间| 
+
+## 3.删除用户接口
+
+请求地址：POST {domain}/api/system/management/user/delete  
+请求参数：
+```json
+{
+    "type": 0,//用户类型：1：学生，2：老师，3：二级学院，0：超级管理员
+    "userId": 12
+}
+``` 
+
+返回数据  
+```json
+{
+    "status": 200,
+    "message": "success",
+    "data": {}
+}
+``` 
+
+## 4.获取学院列表 
+
+请求地址：GET {domain}/api/system/management/college/list  
+请求参数：
+
+|字段|类型|必选|说明|
+|:---|:---|:---|:---|
+|pageNo|int|否|默认为1|
+|pageSize|int|否|默认为20| 
+|search|string|否|学院名称| 
+|isAll|boolean|否|若为true,则显示全部|
+
+返回数据  
+```json
+{
+    "status": 200,
+    "message": "success",
+    "data": {
+        "total": 20,
+        "list": [
+            {
+                "collegeId": 12,
+                "collegeName":  "计算机学院",
+                "description": "备注",
+                "createTime": 1611718548643
+            } 
+        ] 
+    }
+}
+```  
+
+### 结果字段说明
+
+|字段|类型|说明|
+|:---|:---|:---|
+|collegeId|long|学院ID|
+|collegeName|string|学院名称| 
+|description|string|备注| 
+|createTime|long|创建时间|
+
+## 5.获取专业列表 
+
+请求地址：GET {domain}/api/system/management/profession/list  
+请求参数：
+
+|字段|类型|必选|说明|
+|:---|:---|:---|:---|
+|pageNo|int|否|默认为1|
+|pageSize|int|否|默认为20| 
+|search|string|否|专业名称或者学院名称| 
+|collegeId|学院ID|否|调用添加班级接口的时候使用|
+
+返回数据  
+```json
+{
+    "status": 200,
+    "message": "success",
+    "data": {
+        "total": 20,
+        "list": [
+            {
+                "professionId": 1,
+                "professionName": "计算机专业",
+                "collegeId": 12,
+                "collegeName":  "计算机学院",
+                "description": "备注",
+                "createTime": 1611718548643,
+                "updateTime": 1611718548643
+            } 
+        ] 
+    }
+}
+```  
+
+### 结果字段说明
+
+|字段|类型|说明|
+|:---|:---|:---|
+|professionId|long|专业ID|
+|professionName|string|专业名称| 
+|collegeId|long|学院ID|
+|collegeName|string|学院名称| 
+|description|string|备注| 
+|createTime|long|创建时间| 
+|updateTime|long|修改时间| 
+
+## 6.获取班级列表 
+
+请求地址：GET {domain}/api/system/management/class/list  
+请求参数：
+
+|字段|类型|必选|说明|
+|:---|:---|:---|:---|
+|pageNo|int|否|默认为1|
+|pageSize|int|否|默认为20| 
+|search|string|否|专业名称或者学院名称或者班级名称| 
+|professionId|专业ID|否|调用添加班级接口和分配班级接口的时候使用|
+
+返回数据  
+```json
+{
+    "status": 200,
+    "message": "success",
+    "data": {
+        "total": 20,
+        "list": [
+            {
+                "classId": 1,
+                "className": "1701班",
+                "professionId": 1,
+                "professionName": "计算机专业",
+                "collegeId": 12,
+                "collegeName":  "计算机学院",
+                "description": "备注",
+                "createTime": 1611718548643,
+                "updateTime": 1611718548643
+            } 
+        ] 
+    }
+}
+```  
+
+### 结果字段说明
+
+|字段|类型|说明|
+|:---|:---|:---| 
+|classId|long|班级ID|
+|className|string|班级名称|
+|professionId|long|专业ID|
+|professionName|string|专业名称| 
+|collegeId|long|学院ID|
+|collegeName|string|学院名称| 
+|description|string|备注| 
+|createTime|long|创建时间| 
+|updateTime|long|修改时间|  
+
+## 7.添加或编辑班级 
+
+请求地址：POST {domain}/api/system/management/class/add  
+请求参数：
+
+```json
+{
+    "operatorType": 0, //0:添加，1：编辑
+    "classId": 12,//编辑的时候必传
+    "collegeId": 3, //学院ID
+    "professionId": 4,//专业ID
+    "className": "计软1701",//班级名称，去掉班级编号
+}
+``` 
+
+返回数据  
+```json
+{
+    "status": 200,
+    "message": "success",
+    "data": {}
+}
+``` 
+
+## 8.添加或编辑专业
+
+请求地址：POST {domain}/api/system/management/profession/add  
+请求参数：
+
+```json
+{
+    "operatorType": 0, //0:添加，1：编辑
+    "professionId": 12,//编辑的时候必传
+    "collegeId": 3, //学院ID
+    "professionName": "计软1701",//专业名称，去掉需求文档上专业编号那一列
+}
+``` 
+
+返回数据  
+```json
+{
+    "status": 200,
+    "message": "success",
+    "data": {}
+}
+```   
+
+## 9.删除学院、专业、班级
+
+请求地址：POST {domain}/api/system/management/college/delete  
+请求参数：
+```json
+{
+    "type": 1,//类型：1：学院，2：专业，3：班级
+    "id": 12 //所对应的id
+}
+``` 
+
+返回数据  
+```json
+{
+    "status": 200,
+    "message": "success",
+    "data": {}
+}
+``` 
+
+## 10.获取老师信息列表 
+
+请求地址：GET {domain}/api/system/management/teacher/list  
+请求参数：
+
+|字段|类型|必选|说明|
+|:---|:---|:---|:---|
+|pageNo|int|否|默认为1|
+|pageSize|int|否|默认为20| 
+|search|string|否|教师名称或者工号| 
+
+返回数据  
+```json
+{
+    "status": 200,
+    "message": "success",
+    "data": {
+        "total": 20,
+        "list": [
+            {
+                "teacherId": 1, //教师ID
+                "teacherName": "王老师", //教师名称
+                "phone": 15762736337, //联系方式
+                "teacherAccountNumber":  "zhanglaoshi" //账号，需求文档上的工号改为账号
+            } 
+        ] 
+    }
+}
+```  
+
+## 11.获取老师管理的班级列表 
+
+请求地址：GET {domain}/api/system/management/teacher/class/list  
+请求参数：
+
+|字段|类型|必选|说明|
+|:---|:---|:---|:---|
+|pageNo|int|否|默认为1|
+|pageSize|int|否|默认为20| 
+|search|string|否|教师名称或者班级名称| 
+
+返回数据  
+```json
+{
+    "status": 200,
+    "message": "success",
+    "data": {
+        "total": 20,
+        "list": [
+            {
+                "recordId": 12, //记录ID
+                "teacherId": 1, //教师ID
+                "teacherName": "王老师", //教师名称
+                "teacherAccountNumber":  "zhanglaoshi",//教师账号
+                "phone": 15762736337, //联系方式
+                "collegeName":  "计算机学院", //所属学院
+                "collegeId": 12, //学院ID
+                "professionName": "软件工程", //所属专业
+                "professionId": 13 //专业ID
+                "className": "计软1701",//班级名称
+                "classId": 12,//班级ID
+            } 
+        ] 
+    }
+}
+```  
+
+## 12.删除老师管理的班级信息
+
+请求地址：POST {domain}/api/system/management/teacher/class/delete  
+请求参数：
+```json
+{
+    "recordId": 1 //记录ID
+}
+``` 
+
+返回数据  
+```json
+{
+    "status": 200,
+    "message": "success",
+    "data": {}
+}
+``` 
+
+## 13.分配班级
+
+请求地址：POST {domain}/api/system/management/class/divide   
+请求参数：
+
+```json
+{
+    "teacherName": "王老师", //教师名称
+    "teacherAccountNumber":  "zhanglaoshi",//教师账号
+    "collegeId": 13, //学院ID
+    "professionId": 12,//专业ID
+    "classId": [12,13,12] //班级ID列表
+}
+``` 
+
+返回数据  
+```json
+{
+    "status": 200,
+    "message": "success",
+    "data": {}
+}
+```  
+
+## 14.获取学生信息列表 
+
+请求地址：GET {domain}/api/system/management/student/list  
+请求参数：
+
+|字段|类型|必选|说明|
+|:---|:---|:---|:---|  
+|collegeId|long|否|学院ID,不传返回所有|  
+|teacherId|long|否|教师ID,不传返回所有，在老师部分中，获取学生信息列表时用到|
+|pageNo|int|否|默认为1|
+|pageSize|int|否|默认为20| 
+|search|string|否|学生姓名或者班级名称或者学院名称或者专业名称| 
+
+返回数据  
+```json
+{
+    "status": 200,
+    "message": "success",
+    "data": {
+        "total": 20,
+        "list": [
+            {
+                "studentId": 1, //学生ID
+                "studentName": "姜良", //学生姓名
+                "classId": 12, //班级ID
+                "className": "计软1701", //班级名称
+                "professionId": 12, //专业ID
+                "professionName": "软件工程", //专业名称
+                "collegeId": 12, //学院ID
+                "collegeName": "计算机学院",//学院名称
+                "studentNumber": "201712323289", //学号
+                "nativePlace": "山东烟台", //籍贯
+                "nowPlace": "北京昌平", //现居住地
+                "sex": 0 ,//0:男，1:女
+                "status": //填表状态，0：未完成，1：完成
+            } 
+        ] 
+    }
+}
+```   
+
+## 15.获取文件列表
+
+请求地址：GET {domain}/api/system/management/article/list  
+请求参数：
+
+|字段|类型|必选|说明|
+|:---|:---|:---|:---|
+|pageNo|int|否|默认为1|
+|pageSize|int|否|默认为20| 
+|search|string|否|文件名称| 
+
+返回数据  
+```json
+{
+    "status": 200,
+    "message": "success",
+    "data": {
+        "total": 20,
+        "list": [
+            {
+                "articleId": 1, //文档ID
+                "articleName": "基本信息表", //文件名称
+                "articleType": 1, //文档类型，1:老师评分表，2:学生填写表，3:实习任务表
+                "startTime": 1611718548643, //开始时间
+                "endTime": 1611718548643, //结束时间
+            } 
+        ] 
+    }
+}
+```    
+
+## 16.上传文件
+
+请求地址：POST {domain}/api/system/management/article/upload   
+请求参数：   
+格式：form-data类型请求  
+
+|字段|类型|必选|说明|
+|:---|:---|:---|:---|  
+|file|File|是|文件| 
+
+返回数据  
+```json
+{
+    "status": 200,
+    "message": "success",
+    "data": {}
+}
+```  
+
+## 17.编辑文件
+
+请求地址：POST {domain}/api/system/management/article/edit   
+请求参数：   
+```json
+{
+   "articleId": 1, //文档ID，文档名称不支持修改
+   "articleType": 12, //文档类型，1:老师评分表，2:学生填写表，3:实习任务表
+   "startTime": 1611718548643, //开始时间
+   "endTime": 1611718548643, //结束时间
+} 
+```
+
+返回数据  
+```json
+{
+    "status": 200,
+    "message": "success",
+    "data": {}
+}
+``` 
+
+## 18.文件删除
+
+请求地址：POST {domain}/api/system/management/article/delete   
+请求参数：   
+```json
+{
+   "articleId": 1, //文档ID
+} 
+```
+
+返回数据  
+```json
+{
+    "status": 200,
+    "message": "success",
+    "data": {}
+}
+``` 
+
+## 19.文件预览
+
+请求地址：POST {domain}/api/system/management/article/preview   
+请求参数：   
+```json
+{
+   "articleId": 1, //文档ID
+} 
+```
+
+返回数据  
+```json
+{
+    "status": 200,
+    "message": "success",
+    "data": {}
+}
+```   
+
+## 20.获取老师发布任务记录
+
+请求地址：GET {domain}/api/system/management/teacher/task/release/list  
+请求参数：
+
+|字段|类型|必选|说明|
+|:---|:---|:---|:---| 
+|teacherId|long|否|教师ID，不传返回全部|
+|collegeId|long|否|学院ID，不传返回全部学院|
+|pageNo|int|否|默认为1|
+|pageSize|int|否|默认为20| 
+|search|string|否|文件名称或者老师名称| 
+
+返回数据  
+```json
+{
+    "status": 200,
+    "message": "success",
+    "data": {
+        "total": 20,
+        "list": [
+            {   
+                "recordId": 1, //记录ID
+                "articleId": 1, //文档ID
+                "articleName": "基本信息表", //文件名称
+                "releaseTime": 1611718548643, //发布时间
+                "teacherId": 12,//老师ID
+                "teacherName": "王老师", //老师姓名 
+                "collegeName": "信息学院", //学院名称
+                "professionName": "软件工程", //专业名称
+                "className": "计软1701" //班级名称
+            } 
+        ] 
+    }
+}
+```      
+
+## 21.获取学生成绩评定记录
+
+请求地址：GET {domain}/api/system/management/student/grade/list  
+请求参数：
+
+|字段|类型|必选|说明|
+|:---|:---|:---|:---| 
+|teacherId|long|否|教师ID，不传返回全部|
+|collegeId|long|否|学院ID，不传返回全部|
+|pageNo|int|否|默认为1|
+|pageSize|int|否|默认为20| 
+|search|string|否|文件名称或者老师名称或者学生姓名| 
+
+返回数据  
+```json
+{
+    "status": 200,
+    "message": "success",
+    "data": {
+        "total": 20,
+        "list": [
+            {   
+                "recordId": 1, //记录ID
+                "articleId": 1, //文档ID
+                "articleName": "基本信息表", //文件名称
+                "studentName": "姜良", //学生姓名
+                "releaseTime": 1611718548643, //发布时间
+                "teacherId": 12,//老师ID
+                "teacherName": "王老师", //老师姓名 
+                "collegeName": "信息学院", //学院名称
+                "professionName": "软件工程", //专业名称
+                "className": "计软1701" //班级名称
+            } 
+        ] 
+    }
+}
+```     
+
+## 22.删除记录
+
+请求地址：POST {domain}/api/system/management/record/delete   
+请求参数：   
+```json
+{
+   "recordId": 1, //记录ID 
+   "type": 1 //1:老师发布任务记录，2：学生成绩评定记录
+} 
+```
+
+返回数据  
+```json
+{
+    "status": 200,
+    "message": "success",
+    "data": {}
+}
+```  
+
+## 23.文件下载
+
+请求地址：POST {domain}/api/system/management/article/download   
+请求参数：   
+```json
+{
+   "articleId": 1, //文档ID
+} 
+```
+
+返回数据  
+```json
+{
+    "status": 200,
+    "message": "success",
+    "data": {}
+}
+```    
+
+## 24.获取批阅查看列表
+
+请求地址：GET {domain}/api/system/management/student/task/article/list   
+请求参数：
+   
+|字段|类型|必选|说明|
+|:---|:---|:---|:---|  
+|teacherId|否|long|教师ID，不传返回全部|
+|collegeId|否|long|学院ID，不传返回全部学院|
+|pageNo|int|否|默认为1|
+|pageSize|int|否|默认为20| 
+|search|string|否|文件名称或者学生姓名| 
+
+返回数据  
+```json
+{
+    "status": 200,
+    "message": "success",
+    "data": {
+        "total": 20,
+        "list": [
+            {
+                "taskId": 1,//任务ID
+                "studentId": 12,//学生Id
+                "studentName": "姜良",//学生姓名
+                "articleId": 1, //文档ID
+                "articleName": "实习报告",
+                "updateTime": 1611718548643, //更新时间
+                "collegeName": "信息学院", //学院名称
+                "professionName": "软件工程", //专业名称
+                "className": "计软1701" //班级名称
+            }
+        ]
+    }
+}
+```    
+
+# 老师部分 
+
+## 1.获取学生列表 
+
+见上方管理员和二级学院部分  14.获取学生信息列表 
+
+## 2.获取发布任务中的任务列表  
+
+请求地址：GET {domain}/api/system/management/teacher/task/article/list   
+请求参数：
+   
+|字段|类型|必选|说明|
+|:---|:---|:---|:---|  
+|pageNo|int|否|默认为1|
+|pageSize|int|否|默认为20| 
+|search|string|否|文件名称或者学生姓名|  
+
+返回数据  
+```json
+{
+    "status": 200,
+    "message": "success",
+    "data": {
+        "total": 20,
+        "list": [
+            {
+                "articleId": 1, //文档ID
+                "articleName": "实习报告", //文档名称
+                "startTime": 1611718548643, //开始时间
+                "endTime": 1611718548643, //结束时间
+            }
+        ]
+    }
+}
+```  
+
+## 3.下载文件 
+
+见上方管理员和二级学院部分  23.文件下载 
+
+## 4.发布任务 
+
+请求地址：POST {domain}/api/system/management/teacher/task/article/release   
+请求参数：
+   
+```json
+{
+    "articleId": 1, //文档ID
+    "teacherId": 12 //教师ID
+}
+``` 
+
+返回数据  
+```json
+{
+    "status": 200,
+    "message": "success",
+    "data": {}
+}
+``` 
+
+## 5.获取老师发布任务记录 
+
+见上方管理员和二级学院部分  20.获取老师发布任务记录 
+
+## 6.获取批阅查看列表  
+
+见上方管理员和二级学院部分 24.获取批阅查看列表  
+
+## 7.批阅实习表
+
+请求地址：POST {domain}/api/system/management/teacher/task/article/check   
+请求参数：
+   
+```json
+{
+    "taskId": 1, //任务ID
+    "status": 0, //0：通过，1：未通过
+    "remark": "未填写***" //未通过的话需要增加评语
+}
+``` 
+
+返回数据  
+```json
+{
+    "status": 200,
+    "message": "success",
+    "data": {}
+}
+``` 
+
+
