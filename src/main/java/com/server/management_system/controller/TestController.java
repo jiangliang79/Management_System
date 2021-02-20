@@ -1,4 +1,4 @@
-package com.server.management_system;
+package com.server.management_system.controller;
 
 import java.util.Map;
 
