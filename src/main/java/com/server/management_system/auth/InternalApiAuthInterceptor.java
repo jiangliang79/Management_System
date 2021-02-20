@@ -20,7 +20,7 @@ import com.server.management_system.util.TokenUtil;
 @Component
 public class InternalApiAuthInterceptor extends HandlerInterceptorAdapter {
 
-    private static final String ERROR_MSG = "您没有接口调用权限，请联系管理员添加";
+    private static final String ERROR_MSG = "登录状态已经失效，请重新登录";
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
