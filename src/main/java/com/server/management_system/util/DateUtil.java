@@ -12,7 +12,10 @@ import java.util.TimeZone;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
-
+/**
+ * @author jiangliang <jiangliang@kuaishou.com>
+ * Created on 2021-02-13
+ */
 public class DateUtil {
     public static final String YYYYMMDDHHMM = "yyyy-MM-dd HH:mm";
     public static final String YYYYMMDDHHMMSS = "yyyy-MM-dd HH:mm:ss";

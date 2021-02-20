@@ -1,6 +1,9 @@
 package com.server.management_system.exception;
 
-
+/**
+ * @author jiangliang <jiangliang@kuaishou.com>
+ * Created on 2021-02-13
+ */
 public class ServiceException extends RuntimeException {
     private final int code;
     private final String message;

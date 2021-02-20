@@ -13,6 +13,10 @@ import com.server.management_system.constant.ErrorCode;
 import com.server.management_system.exception.ServiceException;
 import com.server.management_system.util.TokenUtil;
 
+/**
+ * @author jiangliang <jiangliang@kuaishou.com>
+ * Created on 2021-02-13
+ */
 @Component
 public class InternalApiAuthInterceptor extends HandlerInterceptorAdapter {
 

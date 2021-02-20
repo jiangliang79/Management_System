@@ -16,6 +16,10 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * @author jiangliang <jiangliang@kuaishou.com>
+ * Created on 2021-02-13
+ */
 @Slf4j
 public class TokenUtil {
 

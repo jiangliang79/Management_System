@@ -1,6 +1,9 @@
 package com.server.management_system.constant;
 
-
+/**
+ * @author jiangliang <jiangliang@kuaishou.com>
+ * Created on 2021-02-13
+ */
 public interface ErrorCode {
     int SUCCESS = 200;
     int SERVER_ERROR = 500;
