@@ -12,5 +12,5 @@ public class LoginVo {
     private Long userId;
     private String username;
     private Integer type;
-    private String Authentication;
+    private String authentication;
 }
