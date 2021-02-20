@@ -5,7 +5,7 @@ create table user_info
     password    varchar(128)    not null default '' comment '密码',
     token       varchar(256)    not null default '' comment '用户token',
     name        varchar(256)    not null default '' comment '昵称',
-    phone       bigint          not null default '' comment '联系方式',
+    phone       bigint          not null default 0 comment '联系方式',
     type        int             not null default 0  comment '用户类型：1：学生，2：老师，3：二级学院，0：超级管理员',
     description varchar(1024)   not null default '' comment '备注',
     deleted     int             not null default 0  comment '是否删除,1已删除，0未删除',
@@ -13,7 +13,7 @@ create table user_info
     update_time bigint          not null default 0  comment '修改时间',
     PRIMARY KEY (id),
     KEY `idx_username` (`username`),
-    KEY `idx_type` (`type`),
+    KEY `idx_type` (`type`)
 )
     ENGINE = InnoDB
     DEFAULT CHARSET = utf8mb4
@@ -71,7 +71,7 @@ create table class_info
 create table teacher_class_relation
 (
     id             bigint unsigned not null auto_increment comment '自增ID',
-    teacher_id     bigint          not null default '' comment '老师ID',
+    teacher_id     bigint          not null default 0 comment '老师ID',
     class_id       bigint          not null default 0  comment '班级ID',
     deleted        int             not null default 0  comment '是否删除,1已删除，0未删除',
     create_time    bigint          not null default 0  comment '创建时间',
@@ -88,7 +88,7 @@ create table student_info
     id             bigint unsigned not null auto_increment comment '自增ID',
     student_id     bigint          not null default 0      comment '学生ID',
     name           varchar(128)    not null default ''     comment '学生姓名',
-    sex            int             not null default 0      commment '性别，0：男生，1：女生',
+    sex            int             not null default 0      comment '性别，0：男生，1：女生',
     phone          bigint          not null default 0      comment  '电话号码',
     class_id       bigint          not null default 0      comment '班级ID',
     id_card        bigint          not null default 0      comment '身份证号',
@@ -110,11 +110,11 @@ create table article_info
     id             bigint unsigned not null auto_increment comment '文档ID',
     name           bigint          not null default 0      comment '文档名称',
     path           varchar(256)    not null default ''     comment '文件路径',
-    type           int             not null default ''     comment '文档类型，1:老师评分表，2:学生填写表，3:实习任务表',
+    type           int             not null default 0     comment '文档类型，1:老师评分表，2:学生填写表，3:实习任务表',
     template       int             not null default 0      comment '是否是模板，1：是，0：否',
-    start_time     bigint          not null default 0      commment '开始时间',
+    start_time     bigint          not null default 0      comment '开始时间',
     end_time       bigint          not null default 0      comment  '结束时间',
-    deleted        int             not null default 0      comment '是否删除,1已删除，0未删除'
+    deleted        int             not null default 0      comment '是否删除,1已删除，0未删除',
     PRIMARY KEY (id)
 )
     ENGINE = InnoDB
@@ -127,8 +127,8 @@ create table teacher_release_record
     article_id     bigint          not null default 0      comment '文档ID',
     teacher_id     bigint          not null default 0      comment '教师ID',
     class_id       bigint          not null default 0      comment '班级ID',
-    release_time   bigint          not null default 0      commment '发布时间',
-    deleted        int             not null default 0      comment '是否删除,1已删除，0未删除'
+    release_time   bigint          not null default 0      comment '发布时间',
+    deleted        int             not null default 0      comment '是否删除,1已删除，0未删除',
     PRIMARY KEY (id)
 )
     ENGINE = InnoDB
@@ -142,8 +142,8 @@ create table student_grade_record
     student_id     bigint          not null default 0      comment '学生ID',
     teacher_id     bigint          not null default 0      comment '教师ID',
     class_id       bigint          not null default 0      comment '班级ID',
-    release_time   bigint          not null default 0      commment '发布时间',
-    deleted        int             not null default 0      comment '是否删除,1已删除，0未删除'
+    release_time   bigint          not null default 0      comment '发布时间',
+    deleted        int             not null default 0      comment '是否删除,1已删除，0未删除',
     PRIMARY KEY (id)
 )
     ENGINE = InnoDB
