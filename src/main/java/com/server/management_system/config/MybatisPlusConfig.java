@@ -9,10 +9,6 @@ import com.baomidou.mybatisplus.extension.plugins.PaginationInterceptor;
 
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * @author sunguiyong <sunguiong@kuaishou.com>
- * Created on 2020-04-16
- */
 @ConditionalOnClass(value = {PaginationInterceptor.class})
 @Configuration
 @MapperScan("com.server.management_system.dao")
