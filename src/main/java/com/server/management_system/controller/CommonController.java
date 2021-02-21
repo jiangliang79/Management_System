@@ -54,4 +54,6 @@ public class CommonController {
         }
         return RestRsp.success(commonService.logout(loginReq.getUsername()));
     }
+
+
 }
