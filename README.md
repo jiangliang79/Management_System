@@ -3,11 +3,13 @@
 # 项目运行
 1、下载安装jdk
 http://soft.corp.kuaishou.com/ios/jdk-8u202-macosx-x64.dmg
-2、下载安装maven
+2、下载安装maven  
+```html
 （1) brew install maven   
- (2) mkdir -p ~/.m2/  
+ (2) mkdir -p ~/.m2/
  (3) 在~/.m2/ 目录下创建 settings.xml文件和repository文件夹   
- (4) 将以下内容复制到settings.xml中   
+ (4) 将以下内容复制到settings.xml中 
+```
  ```html
 <?xml version="1.0" encoding="UTF-8"?>
 <settings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/SETTINGS/1.0.0"
