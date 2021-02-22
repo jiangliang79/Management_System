@@ -2,7 +2,7 @@
 实习管理系统后端项目
 # 项目运行
 1、下载安装jdk
-http://soft.corp.kuaishou.com/ios/jdk-8u202-macosx-x64.dmg
+http://soft.corp.kuaishou.com/ios/jdk-8u202-macosx-x64.dmg   
 2、下载安装maven  
 ```html
 （1) brew install maven   
