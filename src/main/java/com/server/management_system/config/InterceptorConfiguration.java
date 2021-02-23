@@ -24,7 +24,7 @@ public class InterceptorConfiguration implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(internalApiAuthInterceptor)
-                .addPathPatterns("/api/system/management/**");
+                .addPathPatterns("/api/system/management/**").excludePathPatterns("/api/system/management/common/**");
         log.info("InterceptorConfiguration init");
     }
 }

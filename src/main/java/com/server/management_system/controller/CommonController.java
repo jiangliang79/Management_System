@@ -24,7 +24,7 @@ import com.server.management_system.vo.req.RegisterReq;
  * Created on 2021-02-17
  */
 @RestController
-@RequestMapping("api/system/management")
+@RequestMapping("api/system/management/common")
 @CrossOrigin
 public class CommonController {
 
