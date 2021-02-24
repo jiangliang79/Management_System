@@ -441,4 +441,19 @@ public class AdminService {
         teacherClassRelationRepository.updateById(teacherClassRelation);
         return Maps.newHashMap();
     }
+
+    public Map<String, Object> divideClass(Long teacherId,List<Long> classIds) {
+        classIds.forEach(classId -> {
+            TeacherClassRelation teacherClassRelation = new TeacherClassRelation();
+            teacherClassRelation.setTeacherId(teacherId);
+            teacherClassRelation.setClassId(classId);
+            teacherClassRelation.setDeleted(DeleteStatusEnums.NOT_DELETE.getCode());
+            teacherClassRelation.setCreateTime(System.currentTimeMillis());
+            teacherClassRelation.setUpdateTime(System.currentTimeMillis());
+            if (teacherClassRelationRepository.selectByTeacherIdAndClassId(teacherId, classId) == null) {
+                teacherClassRelationRepository.insert(teacherClassRelation);
+            }
+        });
+        return Maps.newHashMap();
+    }
 }

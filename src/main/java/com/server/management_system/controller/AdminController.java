@@ -5,6 +5,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,6 +32,7 @@ import com.server.management_system.vo.req.AddUserReq;
 import com.server.management_system.vo.req.DeleteOrganizationReq;
 import com.server.management_system.vo.req.DeleteTeacherClassReq;
 import com.server.management_system.vo.req.DeleteUserReq;
+import com.server.management_system.vo.req.DivideClassReq;
 
 /**
  * @author jiangliang <jiangliang@kuaishou.com>
@@ -142,5 +144,13 @@ public class AdminController {
             throw ServiceException.of(ErrorCode.PARAM_INVALID, "参数错误");
         }
         return RestRsp.success(adminService.deleteTeacherClass(deleteTeacherClassReq.getRecordId()));
+    }
+
+    @PostMapping("class/divide")
+    public RestRsp<Map<String, Object>> divideClass(@RequestBody DivideClassReq divideClassReq) {
+        if (divideClassReq.getTeacherId() == null || CollectionUtils.isEmpty(divideClassReq.getClassId())) {
+            throw ServiceException.of(ErrorCode.PARAM_INVALID, "参数错误");
+        }
+        return RestRsp.success(adminService.divideClass(divideClassReq.getTeacherId(), divideClassReq.getClassId()));
     }
 }

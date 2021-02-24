@@ -23,4 +23,9 @@ public interface TeacherClassRelationRepository extends BaseMapper<TeacherClassR
 
     @Select("select * from teacher_class_relation where deleted = 0 and id = #{id} limit 1")
     TeacherClassRelation selectByRecordId(@Param("id") Long id);
+
+    @Select("select * from teacher_class_relation where deleted = 0 and teacher_id = #{teacherId} and class_id = "
+            + "#{classId} limit 1")
+    TeacherClassRelation selectByTeacherIdAndClassId(@Param("teacherId") Long teacherId,
+            @Param("classId") Long classId);
 }
