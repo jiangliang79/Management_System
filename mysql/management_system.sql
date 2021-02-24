@@ -54,7 +54,6 @@ create table class_info
 (
     id             bigint unsigned not null auto_increment comment '班级ID',
     name           varchar(128)    not null default '' comment '班级名称',
-    number         int             not null default 0  comment '班级编号',
     college_id     bigint          not null default 0  comment '学院ID',
     profession_id  bigint          not null default 0  comment '专业ID',
     description    varchar(1024)   not null default '' comment '备注',

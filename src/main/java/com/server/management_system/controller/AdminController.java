@@ -3,6 +3,7 @@ package com.server.management_system.controller;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,12 +17,19 @@ import com.server.management_system.enums.OperatorTypeEnums;
 import com.server.management_system.exception.ServiceException;
 import com.server.management_system.param.PageRequestParam;
 import com.server.management_system.service.AdminService;
+import com.server.management_system.vo.ClassVo;
 import com.server.management_system.vo.CollegeVo;
 import com.server.management_system.vo.ProfessionVo;
 import com.server.management_system.vo.RestListData;
 import com.server.management_system.vo.RestRsp;
+import com.server.management_system.vo.TeacherClassVo;
+import com.server.management_system.vo.TeacherVo;
 import com.server.management_system.vo.UserVo;
+import com.server.management_system.vo.req.AddClassReq;
+import com.server.management_system.vo.req.AddProfessionReq;
 import com.server.management_system.vo.req.AddUserReq;
+import com.server.management_system.vo.req.DeleteOrganizationReq;
+import com.server.management_system.vo.req.DeleteTeacherClassReq;
 import com.server.management_system.vo.req.DeleteUserReq;
 
 /**
@@ -79,4 +87,60 @@ public class AdminController {
         return RestRsp.success(adminService.getProfessionList(pageRequestParam, search, collegeId));
     }
 
+    @GetMapping("class/list")
+    public RestRsp<RestListData<ClassVo>> getClassList(PageRequestParam pageRequestParam, String search,
+            Long professionId) {
+        return RestRsp.success(adminService.getClassList(pageRequestParam, search, professionId));
+    }
+
+    @PostMapping("class/add")
+    public RestRsp<Map<String, Object>> addOrEditClass(@RequestBody AddClassReq addClassReq) {
+        if (addClassReq.getOperatorType() == null || addClassReq.getCollegeId() == null
+                || addClassReq.getProfessionId() == null) {
+            throw ServiceException.of(ErrorCode.PARAM_INVALID, "参数错误");
+        }
+        if (addClassReq.getOperatorType().equals(OperatorTypeEnums.ADD.getCode())) {
+            return RestRsp.success(adminService.addClass(addClassReq));
+        } else {
+            return RestRsp.success(adminService.editClass(addClassReq));
+        }
+    }
+
+    @PostMapping("profession/add")
+    public RestRsp<Map<String, Object>> addOrEditProfession(@RequestBody AddProfessionReq addProfessionReq) {
+        if (addProfessionReq.getOperatorType() == null || addProfessionReq.getCollegeId() == null) {
+            throw ServiceException.of(ErrorCode.PARAM_INVALID, "参数错误");
+        }
+        if (addProfessionReq.getOperatorType().equals(OperatorTypeEnums.ADD.getCode())) {
+            return RestRsp.success(adminService.addProfession(addProfessionReq));
+        } else {
+            return RestRsp.success(adminService.editProfession(addProfessionReq));
+        }
+    }
+
+    @PostMapping("organization/delete")
+    public RestRsp<Map<String, Object>> deleteOrganization(@RequestBody DeleteOrganizationReq deleteOrganizationReq) {
+        if (deleteOrganizationReq.getType() == null || deleteOrganizationReq.getId() == null) {
+            throw ServiceException.of(ErrorCode.PARAM_INVALID, "参数错误");
+        }
+        return RestRsp.success(adminService.deleteOrganization(deleteOrganizationReq));
+    }
+
+    @GetMapping("teacher/list")
+    public RestRsp<RestListData<TeacherVo>> getTeacherList(PageRequestParam pageRequestParam, String search) {
+        return RestRsp.success(adminService.getTeacherList(pageRequestParam, search));
+    }
+
+    @GetMapping("teacher/class/list")
+    public RestRsp<RestListData<TeacherClassVo>> getTeacherClassList(PageRequestParam pageRequestParam, String search) {
+        return RestRsp.success(adminService.getTeacherClassList(pageRequestParam, search));
+    }
+
+    @PostMapping("teacher/class/delete")
+    public RestRsp<Map<String, Object>> deleteTeacherClass(@RequestBody DeleteTeacherClassReq deleteTeacherClassReq) {
+        if (deleteTeacherClassReq.getRecordId() == null) {
+            throw ServiceException.of(ErrorCode.PARAM_INVALID, "参数错误");
+        }
+        return RestRsp.success(adminService.deleteTeacherClass(deleteTeacherClassReq.getRecordId()));
+    }
 }

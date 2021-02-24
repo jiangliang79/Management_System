@@ -23,4 +23,7 @@ public interface UserInfoRepository extends BaseMapper<UserInfo> {
 
     @Select("select * from user_info where id = #{userId} and deleted = 0 limit 1")
     UserInfo selectByUserId(@Param("userId") Long userId);
+
+    @Select("select * from user_info where type = #{type} and deleted = 0")
+    List<UserInfo> selectUserByType(@Param("type") Integer type);
 }

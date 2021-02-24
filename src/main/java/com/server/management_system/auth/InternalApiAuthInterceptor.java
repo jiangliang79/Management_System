@@ -29,7 +29,7 @@ public class InternalApiAuthInterceptor extends HandlerInterceptorAdapter {
         if (TokenUtil.tokenValid(tokenHeader)) {
             return true;
         }
-        throw ServiceException.of(ErrorCode.PERMISSION_DENIED, ERROR_MSG);
+        throw ServiceException.of(ErrorCode.UNAUTHORIZED, ERROR_MSG);
     }
 
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable
