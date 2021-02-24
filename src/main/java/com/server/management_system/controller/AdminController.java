@@ -17,6 +17,7 @@ import com.server.management_system.enums.OperatorTypeEnums;
 import com.server.management_system.exception.ServiceException;
 import com.server.management_system.param.PageRequestParam;
 import com.server.management_system.service.AdminService;
+import com.server.management_system.vo.ArticleVo;
 import com.server.management_system.vo.ClassVo;
 import com.server.management_system.vo.CollegeVo;
 import com.server.management_system.vo.ProfessionVo;
@@ -158,5 +159,10 @@ public class AdminController {
     public RestRsp<RestListData<StudentVo>> getStudentList(Long collegeId, Long teacherId,
             PageRequestParam pageRequestParam, String search) {
         return RestRsp.success(adminService.getStudentList(collegeId, teacherId, pageRequestParam, search));
+    }
+
+    @GetMapping("article/list")
+    public RestRsp<RestListData<ArticleVo>> getArticleList(PageRequestParam pageRequestParam, String search) {
+        return RestRsp.success(adminService.getArticleList(pageRequestParam, search));
     }
 }

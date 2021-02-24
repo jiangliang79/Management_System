@@ -12,23 +12,29 @@ import org.springframework.util.CollectionUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.server.management_system.constant.ErrorCode;
+import com.server.management_system.dao.ArticleInfoRepository;
 import com.server.management_system.dao.ClassInfoRepository;
 import com.server.management_system.dao.CollegeInfoRepository;
 import com.server.management_system.dao.ProfessionInfoRepository;
 import com.server.management_system.dao.StudentInfoRepository;
+import com.server.management_system.dao.StudentTaskArticleRepository;
 import com.server.management_system.dao.TeacherClassRelationRepository;
 import com.server.management_system.dao.UserInfoRepository;
+import com.server.management_system.domain.ArticleInfo;
 import com.server.management_system.domain.ClassInfo;
 import com.server.management_system.domain.CollegeInfo;
 import com.server.management_system.domain.ProfessionInfo;
 import com.server.management_system.domain.StudentInfo;
+import com.server.management_system.domain.StudentTaskArticle;
 import com.server.management_system.domain.TeacherClassRelation;
 import com.server.management_system.domain.UserInfo;
 import com.server.management_system.enums.DeleteOrganizationEnums;
 import com.server.management_system.enums.DeleteStatusEnums;
+import com.server.management_system.enums.StudentTaskStatusEnums;
 import com.server.management_system.enums.UserTypeEnums;
 import com.server.management_system.exception.ServiceException;
 import com.server.management_system.param.PageRequestParam;
+import com.server.management_system.vo.ArticleVo;
 import com.server.management_system.vo.ClassVo;
 import com.server.management_system.vo.CollegeVo;
 import com.server.management_system.vo.ProfessionVo;
@@ -60,6 +66,10 @@ public class AdminService {
     private ClassInfoRepository classInfoRepository;
     @Resource
     private TeacherClassRelationRepository teacherClassRelationRepository;
+    @Resource
+    private StudentTaskArticleRepository studentTaskArticleRepository;
+    @Resource
+    private ArticleInfoRepository articleInfoRepository;
 
     public Map<String, Object> addUser(AddUserReq addUserReq) {
         UserInfo userInfo = new UserInfo();
@@ -465,6 +475,7 @@ public class AdminService {
 
     public RestListData<StudentVo> getStudentList(Long collegeId, Long teacherId,
             PageRequestParam pageRequestParam, String search) {
+        search = (search == null) ? StringUtils.EMPTY : search;
         List<StudentVo> studentVoList = Lists.newArrayList();
         List<StudentInfo> studentInfoList;
         if (collegeId == null && teacherId == null) {
@@ -504,6 +515,7 @@ public class AdminService {
         if (CollectionUtils.isEmpty(studentInfoList)) {
             return RestListData.create(studentVoList.size(), studentVoList);
         }
+        String finalSearch = search;
         studentInfoList.forEach(studentInfo -> {
             StudentVo studentVo = new StudentVo();
             studentVo.setStudentId(studentInfo.getStudentId());
@@ -528,11 +540,23 @@ public class AdminService {
                     studentVo.setProfessionName(professionInfo.getName());
                 }
             }
-            //todo status
-            if (StringUtils.containsIgnoreCase(studentVo.getStudentName(), search) || StringUtils
-                    .containsIgnoreCase(studentVo.getClassName(), search) || StringUtils
-                    .containsIgnoreCase(studentVo.getCollegeName(), search) || StringUtils
-                    .containsIgnoreCase(studentVo.getProfessionName(), search)) {
+            List<StudentTaskArticle> studentTaskArticleList =
+                    studentTaskArticleRepository.selectByStudentId(studentInfo.getStudentId());
+            if (CollectionUtils.isEmpty(studentTaskArticleList)) {
+                studentVo.setStatus(1);
+            } else {
+                studentVo.setStatus(1);
+                studentTaskArticleList.forEach(studentTaskArticle -> {
+                    if (studentTaskArticle.getStatus().equals(StudentTaskStatusEnums.UNKNOWN.getCode())
+                            || studentTaskArticle.getStatus().equals(StudentTaskStatusEnums.FAIL.getCode())) {
+                        studentVo.setStatus(0);
+                    }
+                });
+            }
+            if (StringUtils.containsIgnoreCase(studentVo.getStudentName(), finalSearch) || StringUtils
+                    .containsIgnoreCase(studentVo.getClassName(), finalSearch) || StringUtils
+                    .containsIgnoreCase(studentVo.getCollegeName(), finalSearch) || StringUtils
+                    .containsIgnoreCase(studentVo.getProfessionName(), finalSearch)) {
                 studentVoList.add(studentVo);
             }
         });
@@ -541,5 +565,27 @@ public class AdminService {
         return RestListData.create(studentVoList.size(), studentVoList.subList(start, end));
     }
 
+    public RestListData<ArticleVo> getArticleList(PageRequestParam pageRequestParam, String search) {
+        search = (search == null) ? StringUtils.EMPTY : search;
+        List<ArticleVo> articleVoList = Lists.newArrayList();
+        List<ArticleInfo> articleInfoList = articleInfoRepository.getArticleList();
+        if (CollectionUtils.isEmpty(articleInfoList)) {
+            return RestListData.create(articleVoList.size(), articleVoList);
+        }
+        for (ArticleInfo articleInfo : articleInfoList) {
+            ArticleVo articleVo = new ArticleVo();
+            articleVo.setArticleId(articleInfo.getId());
+            articleVo.setArticleName(articleInfo.getName());
+            articleVo.setArticleType(articleInfo.getType());
+            articleVo.setStartTime(articleInfo.getStartTime());
+            articleVo.setEndTime(articleInfo.getEndTime());
+            if (StringUtils.containsIgnoreCase(articleVo.getArticleName(), search)) {
+                articleVoList.add(articleVo);
+            }
+        }
+        int start = pageRequestParam.getStart();
+        int end = Math.min(start + pageRequestParam.getPageSize(), articleVoList.size());
+        return RestListData.create(articleVoList.size(), articleVoList.subList(start, end));
+    }
 
 }

@@ -107,7 +107,7 @@ create table student_info
 create table article_info
 (
     id             bigint unsigned not null auto_increment comment '文档ID',
-    name           bigint          not null default 0      comment '文档名称',
+    name           varchar(256)    not null default 0      comment '文档名称',
     path           varchar(256)    not null default ''     comment '文件路径',
     type           int             not null default 0     comment '文档类型，1:老师评分表，2:学生填写表，3:实习任务表',
     template       int             not null default 0      comment '是否是模板，1：是，0：否',
