@@ -18,7 +18,7 @@ public class PageRequestParam {
     }
 
     public Integer getPageSize() {
-        return pageSize != null && pageSize > 0 ? pageSize : 20;
+        return pageSize != null && pageSize > 0 ? pageSize : 10;
     }
 
     public Integer getStart() { // 兼容mysql limit  #{start},#{limit}
