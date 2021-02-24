@@ -156,7 +156,7 @@ create table student_task_article
     student_id     bigint          not null default 0      comment '学生ID',
     teacher_id     bigint          not null default 0      comment '教师ID',
     class_id       bigint          not null default 0      comment '班级ID',
-    status         int             not null default 0      comment '0：通过，1：未通过',
+    status         int             not null default 0      comment '0：通过，1：未通过，2：未填写',
     remark         varchar(1024)   not null default ''     comment '评语',
     deleted        int             not null default 0      comment '是否删除,1已删除，0未删除',
     create_time    bigint          not null default 0      comment '创建时间',

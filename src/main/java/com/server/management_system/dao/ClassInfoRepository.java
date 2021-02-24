@@ -21,6 +21,9 @@ public interface ClassInfoRepository extends BaseMapper<ClassInfo> {
     @Select("select * from class_info where profession_id = #{professionId} and deleted = 0")
     List<ClassInfo> selectByProfessionId(@Param("professionId") Long professionId);
 
+    @Select("select * from class_info where college_id = #{collegeId} and deleted = 0")
+    List<ClassInfo> selectByCollegeId(@Param("collegeId") Long collegeId);
+
     @Select("select * from class_info where id = #{id} and deleted = 0 limit 1")
     ClassInfo selectByClassId(@Param("id") Long classId);
 

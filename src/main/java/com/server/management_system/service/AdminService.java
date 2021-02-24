@@ -33,6 +33,7 @@ import com.server.management_system.vo.ClassVo;
 import com.server.management_system.vo.CollegeVo;
 import com.server.management_system.vo.ProfessionVo;
 import com.server.management_system.vo.RestListData;
+import com.server.management_system.vo.StudentVo;
 import com.server.management_system.vo.TeacherClassVo;
 import com.server.management_system.vo.TeacherVo;
 import com.server.management_system.vo.UserVo;
@@ -159,6 +160,7 @@ public class AdminService {
                 collegeInfoRepository.updateById(collegeInfo);
             }
         }
+        userInfoRepository.updateById(userInfo);
         return Maps.newHashMap();
     }
 
@@ -191,6 +193,7 @@ public class AdminService {
 
     public RestListData<ProfessionVo> getProfessionList(PageRequestParam pageRequestParam, String search,
             Long collegeId) {
+        search = (search == null) ? StringUtils.EMPTY : search;
         List<ProfessionVo> professionVoList = Lists.newArrayList();
         List<ProfessionInfo> professionInfoList;
         if (collegeId == null) {
@@ -223,6 +226,7 @@ public class AdminService {
 
     public RestListData<ClassVo> getClassList(PageRequestParam pageRequestParam, String search,
             Long professionId) {
+        search = (search == null) ? StringUtils.EMPTY : search;
         List<ClassVo> classVoList = Lists.newArrayList();
         List<ClassInfo> classInfoList;
         if (professionId == null) {
@@ -370,6 +374,7 @@ public class AdminService {
     }
 
     public RestListData<TeacherVo> getTeacherList(PageRequestParam pageRequestParam, String search) {
+        search = (search == null) ? StringUtils.EMPTY : search;
         List<TeacherVo> teacherVoList = Lists.newArrayList();
         List<UserInfo> userInfoList = userInfoRepository.selectUserByType(UserTypeEnums.TEACHER.getCode());
         if (CollectionUtils.isEmpty(userInfoList)) {
@@ -392,6 +397,7 @@ public class AdminService {
     }
 
     public RestListData<TeacherClassVo> getTeacherClassList(PageRequestParam pageRequestParam, String search) {
+        search = (search == null) ? StringUtils.EMPTY : search;
         List<TeacherClassVo> teacherClassVoList = Lists.newArrayList();
         List<TeacherClassRelation> teacherClassRelationList = teacherClassRelationRepository.selectAll();
         if (CollectionUtils.isEmpty(teacherClassRelationList)) {
@@ -442,7 +448,7 @@ public class AdminService {
         return Maps.newHashMap();
     }
 
-    public Map<String, Object> divideClass(Long teacherId,List<Long> classIds) {
+    public Map<String, Object> divideClass(Long teacherId, List<Long> classIds) {
         classIds.forEach(classId -> {
             TeacherClassRelation teacherClassRelation = new TeacherClassRelation();
             teacherClassRelation.setTeacherId(teacherId);
@@ -456,4 +462,84 @@ public class AdminService {
         });
         return Maps.newHashMap();
     }
+
+    public RestListData<StudentVo> getStudentList(Long collegeId, Long teacherId,
+            PageRequestParam pageRequestParam, String search) {
+        List<StudentVo> studentVoList = Lists.newArrayList();
+        List<StudentInfo> studentInfoList;
+        if (collegeId == null && teacherId == null) {
+            studentInfoList = studentInfoRepository.getStudentList();
+        } else if (collegeId == null) {
+            List<TeacherClassRelation> teacherClassRelationList =
+                    teacherClassRelationRepository.selectByTeacherId(teacherId);
+            if (CollectionUtils.isEmpty(teacherClassRelationList)) {
+                return RestListData.create(studentVoList.size(), studentVoList);
+            }
+            List<Long> classIds = Lists.newArrayList();
+            teacherClassRelationList.forEach(teacherClassRelation -> {
+                classIds.add(teacherClassRelation.getClassId());
+            });
+            if (CollectionUtils.isEmpty(classIds)) {
+                return RestListData.create(studentVoList.size(), studentVoList);
+            }
+            studentInfoList = studentInfoRepository.selectStudentListByClassIds(classIds);
+        } else {
+            CollegeInfo collegeInfo = collegeInfoRepository.selectByCollegeId(collegeId);
+            if (collegeInfo == null) {
+                return RestListData.create(studentVoList.size(), studentVoList);
+            }
+            List<ClassInfo> classInfoList = classInfoRepository.selectByCollegeId(collegeId);
+            if (CollectionUtils.isEmpty(classInfoList)) {
+                return RestListData.create(studentVoList.size(), studentVoList);
+            }
+            List<Long> classIds = Lists.newArrayList();
+            classInfoList.forEach(classInfo -> {
+                classIds.add(classInfo.getId());
+            });
+            if (CollectionUtils.isEmpty(classIds)) {
+                return RestListData.create(studentVoList.size(), studentVoList);
+            }
+            studentInfoList = studentInfoRepository.selectStudentListByClassIds(classIds);
+        }
+        if (CollectionUtils.isEmpty(studentInfoList)) {
+            return RestListData.create(studentVoList.size(), studentVoList);
+        }
+        studentInfoList.forEach(studentInfo -> {
+            StudentVo studentVo = new StudentVo();
+            studentVo.setStudentId(studentInfo.getStudentId());
+            studentVo.setStudentName(studentInfo.getName());
+            studentVo.setStudentNumber(studentInfo.getStudentNumber());
+            studentVo.setNativePlace(studentInfo.getNativePlace());
+            studentVo.setNowPlace(studentInfo.getNowPlace());
+            studentVo.setSex(studentInfo.getSex());
+            ClassInfo classInfo = classInfoRepository.selectByClassId(studentInfo.getClassId());
+            if (classInfo != null) {
+                studentVo.setClassId(classInfo.getId());
+                studentVo.setClassName(classInfo.getName());
+                studentVo.setProfessionId(classInfo.getProfessionId());
+                studentVo.setCollegeId(classInfo.getCollegeId());
+                CollegeInfo collegeInfo = collegeInfoRepository.selectByCollegeId(classInfo.getCollegeId());
+                if (collegeInfo != null) {
+                    studentVo.setCollegeName(collegeInfo.getName());
+                }
+                ProfessionInfo professionInfo =
+                        professionInfoRepository.selectByProfessionId(classInfo.getProfessionId());
+                if (professionInfo != null) {
+                    studentVo.setProfessionName(professionInfo.getName());
+                }
+            }
+            //todo status
+            if (StringUtils.containsIgnoreCase(studentVo.getStudentName(), search) || StringUtils
+                    .containsIgnoreCase(studentVo.getClassName(), search) || StringUtils
+                    .containsIgnoreCase(studentVo.getCollegeName(), search) || StringUtils
+                    .containsIgnoreCase(studentVo.getProfessionName(), search)) {
+                studentVoList.add(studentVo);
+            }
+        });
+        int start = pageRequestParam.getStart();
+        int end = Math.min(start + pageRequestParam.getPageSize(), studentVoList.size());
+        return RestListData.create(studentVoList.size(), studentVoList.subList(start, end));
+    }
+
+
 }

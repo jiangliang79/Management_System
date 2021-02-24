@@ -3,7 +3,6 @@ package com.server.management_system.controller;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -23,6 +22,7 @@ import com.server.management_system.vo.CollegeVo;
 import com.server.management_system.vo.ProfessionVo;
 import com.server.management_system.vo.RestListData;
 import com.server.management_system.vo.RestRsp;
+import com.server.management_system.vo.StudentVo;
 import com.server.management_system.vo.TeacherClassVo;
 import com.server.management_system.vo.TeacherVo;
 import com.server.management_system.vo.UserVo;
@@ -152,5 +152,11 @@ public class AdminController {
             throw ServiceException.of(ErrorCode.PARAM_INVALID, "参数错误");
         }
         return RestRsp.success(adminService.divideClass(divideClassReq.getTeacherId(), divideClassReq.getClassId()));
+    }
+
+    @GetMapping("student/list")
+    public RestRsp<RestListData<StudentVo>> getStudentList(Long collegeId, Long teacherId,
+            PageRequestParam pageRequestParam, String search) {
+        return RestRsp.success(adminService.getStudentList(collegeId, teacherId, pageRequestParam, search));
     }
 }
