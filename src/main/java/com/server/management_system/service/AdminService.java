@@ -2,9 +2,7 @@ package com.server.management_system.service;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -16,14 +14,15 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.documents4j.job.LocalConverter;
 
+import org.jodconverter.DocumentConverter;
+import org.jodconverter.office.OfficeException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.documents4j.api.DocumentType;
-import com.documents4j.api.IConverter;
+import com.baomidou.mybatisplus.extension.api.R;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.server.management_system.constant.ErrorCode;
@@ -34,6 +33,7 @@ import com.server.management_system.dao.ProfessionInfoRepository;
 import com.server.management_system.dao.StudentInfoRepository;
 import com.server.management_system.dao.StudentTaskArticleRepository;
 import com.server.management_system.dao.TeacherClassRelationRepository;
+import com.server.management_system.dao.TeacherReleaseRecordRepository;
 import com.server.management_system.dao.UserInfoRepository;
 import com.server.management_system.domain.ArticleInfo;
 import com.server.management_system.domain.ClassInfo;
@@ -42,6 +42,7 @@ import com.server.management_system.domain.ProfessionInfo;
 import com.server.management_system.domain.StudentInfo;
 import com.server.management_system.domain.StudentTaskArticle;
 import com.server.management_system.domain.TeacherClassRelation;
+import com.server.management_system.domain.TeacherReleaseRecord;
 import com.server.management_system.domain.UserInfo;
 import com.server.management_system.enums.DeleteOrganizationEnums;
 import com.server.management_system.enums.DeleteStatusEnums;
@@ -58,6 +59,7 @@ import com.server.management_system.vo.RestListData;
 import com.server.management_system.vo.RestRsp;
 import com.server.management_system.vo.StudentVo;
 import com.server.management_system.vo.TeacherClassVo;
+import com.server.management_system.vo.TeacherTaskReleaseVo;
 import com.server.management_system.vo.TeacherVo;
 import com.server.management_system.vo.UserVo;
 import com.server.management_system.vo.req.AddClassReq;
@@ -91,6 +93,10 @@ public class AdminService {
     private StudentTaskArticleRepository studentTaskArticleRepository;
     @Resource
     private ArticleInfoRepository articleInfoRepository;
+    @Resource
+    private TeacherReleaseRecordRepository teacherReleaseRecordRepository;
+    @Autowired(required = false)
+    private DocumentConverter converter;
 
     public Map<String, Object> addUser(AddUserReq addUserReq) {
         UserInfo userInfo = new UserInfo();
@@ -699,27 +705,11 @@ public class AdminService {
                 newFile.mkdirs();
             }
             String savePath = newFile.getAbsolutePath() + "/"; //pdf文件生成保存的路径
-            String fileName = "JCccc" + UUID.randomUUID().toString().replace("-", "").substring(0, 6);
+            String fileName = UUID.randomUUID().toString().replace("-", "").substring(0, 6);
             String fileType = ".pdf"; //pdf文件后缀
             String newFileMix = savePath + fileName + fileType;  //将这三个拼接起来,就是我们最后生成文件保存的完整访问路径了
             String suffixName = articleInfo.getPath().substring(articleInfo.getPath().lastIndexOf("."));
-            if (suffixName.equals(fileType)) {
-                newFileMix = System.getProperty("user.dir") + articleInfo.getPath();
-            } else {
-                //文件转化
-                InputStream docxInputStream = new FileInputStream(file);
-                OutputStream outputStream = new FileOutputStream(new File(newFileMix));
-                IConverter converter = LocalConverter.builder().build();
-                if (suffixName.equals(".docx")) {
-                    converter.convert(docxInputStream).as(DocumentType.DOCX).to(outputStream).as(DocumentType.PDF)
-                            .execute();
-                } else if (suffixName.equals(".doc")) {
-                    converter.convert(docxInputStream).as(DocumentType.DOC).to(outputStream).as(DocumentType.PDF)
-                            .execute();
-                }
-                outputStream.close();
-            }
-            //converter.convert(file).to(new File(newFileMix)).execute();
+            converter.convert(file).to(new File(newFileMix)).execute();
             //使用response,将pdf文件以流的方式发送的前端浏览器上
             ServletOutputStream servletoutputStream = response.getOutputStream();
             InputStream in = new FileInputStream(new File(newFileMix));// 读取文件
@@ -733,4 +723,62 @@ public class AdminService {
         return RestRsp.success(Maps.newHashMap());
     }
 
+    public RestListData<TeacherTaskReleaseVo> getTeacherReleaseList(Long teacherId, Long collegeId,
+            PageRequestParam pageRequestParam, String search) {
+        List<TeacherTaskReleaseVo> teacherTaskReleaseVos = Lists.newArrayList();
+        List<TeacherReleaseRecord> teacherReleaseRecordList;
+        if (teacherId == null && collegeId == null) {
+            teacherReleaseRecordList = teacherReleaseRecordRepository.selectAllList();
+        } else if (teacherId == null) {
+            List<ClassInfo> classInfoList = classInfoRepository.selectByCollegeId(collegeId);
+            if (CollectionUtils.isEmpty(classInfoList)) {
+                return RestListData.create(teacherTaskReleaseVos.size(), teacherTaskReleaseVos);
+            }
+            List<Long> classIds = Lists.newArrayList();
+            for (ClassInfo classInfo : classInfoList) {
+                classIds.add(classInfo.getId());
+            }
+            teacherReleaseRecordList = teacherReleaseRecordRepository.selectByClassIds(classIds);
+        } else {
+            teacherReleaseRecordList = teacherReleaseRecordRepository.selectByTeacherId(teacherId);
+        }
+        if (CollectionUtils.isEmpty(teacherReleaseRecordList)) {
+            return RestListData.create(teacherTaskReleaseVos.size(), teacherTaskReleaseVos);
+        }
+        for (TeacherReleaseRecord teacherReleaseRecord : teacherReleaseRecordList) {
+            TeacherTaskReleaseVo teacherTaskReleaseVo = new TeacherTaskReleaseVo();
+            teacherTaskReleaseVo.setRecordId(teacherReleaseRecord.getId());
+            teacherTaskReleaseVo.setArticleId(teacherReleaseRecord.getArticleId());
+            ArticleInfo articleInfo = articleInfoRepository.selectByArticleId(teacherReleaseRecord.getArticleId());
+            if (articleInfo != null) {
+                teacherTaskReleaseVo.setArticleName(articleInfo.getName());
+            }
+            teacherTaskReleaseVo.setReleaseTime(teacherReleaseRecord.getReleaseTime());
+            teacherTaskReleaseVo.setTeacherId(teacherReleaseRecord.getTeacherId());
+            UserInfo userInfo = userInfoRepository.selectByUserId(teacherReleaseRecord.getTeacherId());
+            if (userInfo != null) {
+                teacherTaskReleaseVo.setTeacherName(userInfo.getName());
+            }
+            ClassInfo classInfo = classInfoRepository.selectByClassId(teacherReleaseRecord.getClassId());
+            if (classInfo != null) {
+                teacherTaskReleaseVo.setClassName(classInfo.getName());
+                CollegeInfo collegeInfo = collegeInfoRepository.selectByCollegeId(classInfo.getCollegeId());
+                ProfessionInfo professionInfo =
+                        professionInfoRepository.selectByProfessionId(classInfo.getProfessionId());
+                if (collegeInfo != null) {
+                    teacherTaskReleaseVo.setCollegeName(collegeInfo.getName());
+                }
+                if (professionInfo != null) {
+                    teacherTaskReleaseVo.setProfessionName(professionInfo.getName());
+                }
+            }
+            if (StringUtils.containsIgnoreCase(teacherTaskReleaseVo.getArticleName(), search) || StringUtils
+                    .containsIgnoreCase(teacherTaskReleaseVo.getTeacherName(), search)) {
+                teacherTaskReleaseVos.add(teacherTaskReleaseVo);
+            }
+        }
+        int start = pageRequestParam.getStart();
+        int end = Math.min(start + pageRequestParam.getPageSize(), teacherTaskReleaseVos.size());
+        return RestListData.create(teacherTaskReleaseVos.size(), teacherTaskReleaseVos.subList(start, end));
+    }
 }

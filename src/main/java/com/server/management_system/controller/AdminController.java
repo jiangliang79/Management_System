@@ -1,8 +1,11 @@
 package com.server.management_system.controller;
 
 import java.util.Map;
+
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang3.StringUtils;
+import org.jodconverter.office.OfficeException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -13,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
 import com.server.management_system.constant.ErrorCode;
 import com.server.management_system.enums.OperatorTypeEnums;
 import com.server.management_system.exception.ServiceException;
@@ -26,6 +30,7 @@ import com.server.management_system.vo.RestListData;
 import com.server.management_system.vo.RestRsp;
 import com.server.management_system.vo.StudentVo;
 import com.server.management_system.vo.TeacherClassVo;
+import com.server.management_system.vo.TeacherTaskReleaseVo;
 import com.server.management_system.vo.TeacherVo;
 import com.server.management_system.vo.UserVo;
 import com.server.management_system.vo.req.AddClassReq;
@@ -202,7 +207,14 @@ public class AdminController {
     }
 
     @PostMapping("article/preview")
-    public RestRsp<Map<String, Object>> previewArticle(@RequestBody EditArticleReq editArticleReq, HttpServletResponse response) {
-        return adminService.previewArticle(editArticleReq,response);
+    public RestRsp<Map<String, Object>> previewArticle(@RequestBody EditArticleReq editArticleReq,
+            HttpServletResponse response) {
+        return adminService.previewArticle(editArticleReq, response);
+    }
+
+    @GetMapping("teacher/task/release/list")
+    public RestRsp<RestListData<TeacherTaskReleaseVo>> getTeacherReleaseList(Long teacherId, Long collegeId,
+            PageRequestParam pageRequestParam, String search) {
+        return RestRsp.success(adminService.getTeacherReleaseList(teacherId, collegeId, pageRequestParam, search));
     }
 }

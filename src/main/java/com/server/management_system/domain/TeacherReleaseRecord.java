@@ -7,17 +7,15 @@ import lombok.Data;
 
 /**
  * @author jiangliang <jiangliang@kuaishou.com>
- * Created on 2021-02-24
+ * Created on 2021-02-25
  */
 @Data
-public class ArticleInfo {
+public class TeacherReleaseRecord {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
-    private String name;
-    private String path;
-    private Integer type;
-    private Integer template;
-    private Long startTime;
-    private Long endTime;
+    private Long articleId;
+    private Long teacherId;
+    private Long classId;
+    private Long releaseTime;
     private Integer deleted;
 }

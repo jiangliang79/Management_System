@@ -10,3 +10,10 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
 server:
   port: 8080
+
+#jodconverter:
+#  local:
+#    enabled: true
+#    office-home: /Applications/OpenOffice.app/Contents/
+#    max-tasks-per-process: 10
+#    port-numbers: 8100
