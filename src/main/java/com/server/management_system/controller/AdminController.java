@@ -50,8 +50,7 @@ public class AdminController {
 
     @PostMapping("user/add")
     public RestRsp<Map<String, Object>> addOrEditUser(@RequestBody AddUserReq addUserReq) {
-        if (StringUtils.isEmpty(addUserReq.getUsername()) || StringUtils.isEmpty(addUserReq.getDescription())
-                || StringUtils.isEmpty(addUserReq.getName()) || addUserReq.getOperatorType() == null
+        if (StringUtils.isEmpty(addUserReq.getUsername()) || StringUtils.isEmpty(addUserReq.getName()) || addUserReq.getOperatorType() == null
                 || addUserReq.getUserType() == null) {
             throw ServiceException.of(ErrorCode.PARAM_INVALID, "传参错误");
         }
