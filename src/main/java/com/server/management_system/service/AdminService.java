@@ -1,5 +1,6 @@
 package com.server.management_system.service;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -9,6 +10,8 @@ import org.apache.catalina.User;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -40,6 +43,7 @@ import com.server.management_system.vo.ClassVo;
 import com.server.management_system.vo.CollegeVo;
 import com.server.management_system.vo.ProfessionVo;
 import com.server.management_system.vo.RestListData;
+import com.server.management_system.vo.RestRsp;
 import com.server.management_system.vo.StudentVo;
 import com.server.management_system.vo.TeacherClassVo;
 import com.server.management_system.vo.TeacherVo;
@@ -49,11 +53,14 @@ import com.server.management_system.vo.req.AddProfessionReq;
 import com.server.management_system.vo.req.AddUserReq;
 import com.server.management_system.vo.req.DeleteOrganizationReq;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * @author jiangliang <jiangliang@kuaishou.com>
  * Created on 2021-02-21
  */
 @Service
+@Slf4j
 public class AdminService {
     @Resource
     private UserInfoRepository userInfoRepository;
@@ -103,7 +110,7 @@ public class AdminService {
             collegeInfo.setDeleted(DeleteStatusEnums.NOT_DELETE.getCode());
             collegeInfo.setCreateTime(System.currentTimeMillis());
             collegeInfo.setUpdateTime(System.currentTimeMillis());
-            collegeInfo.setDescription(StringUtils.EMPTY);
+            collegeInfo.setDescription(userInfo.getDescription());
             collegeInfoRepository.insert(collegeInfo);
         }
         return Maps.newHashMap();
@@ -600,6 +607,36 @@ public class AdminService {
         int start = pageRequestParam.getStart();
         int end = Math.min(start + pageRequestParam.getPageSize(), articleVoList.size());
         return RestListData.create(articleVoList.size(), articleVoList.subList(start, end));
+    }
+
+    public RestRsp<Map<String, Object>> uploadFile(MultipartFile file){
+        Map<String, Object> objectMap = Maps.newHashMap();
+        try {
+            if (file.isEmpty()) {
+                throw ServiceException.of(ErrorCode.PARAM_INVALID, "文件不能为空");
+            }
+            String fileName = file.getOriginalFilename();
+            if (StringUtils.isEmpty(fileName)) {
+                throw ServiceException.of(ErrorCode.PARAM_INVALID, "文件名不能为空");
+            }
+            log.info("上传的文件名为：" + fileName);
+            // 获取文件的后缀名
+            String suffixName = fileName.substring(fileName.lastIndexOf("."));
+            log.info("文件的后缀名为：" + suffixName);
+            // 设置文件存储路径
+            File path = new File(System.getProperty("user.dir") + "/src/main/resources");
+            File upload = new File(path.getAbsolutePath(), "/file");
+            File dest = new File(upload.getAbsolutePath() + fileName);
+            // 检测是否存在目录
+            if (!dest.getParentFile().exists()) {
+                dest.getParentFile().mkdirs();// 新建文件夹
+            }
+            file.transferTo(dest);// 文件写入
+            return RestRsp.success(objectMap);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return RestRsp.fail(ErrorCode.SERVER_ERROR, "上传失败");
     }
 
 }
