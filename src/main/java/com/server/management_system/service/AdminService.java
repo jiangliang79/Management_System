@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.apache.catalina.User;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -114,13 +115,22 @@ public class AdminService {
             throw ServiceException.of(ErrorCode.NOT_FOUNT, "用户不存在");
         }
         userInfo.setUsername(addUserReq.getUsername());
-        userInfo.setPassword(addUserReq.getPassword());
         userInfo.setType(addUserReq.getUserType());
         userInfo.setName(addUserReq.getName());
         userInfo.setDescription(addUserReq.getDescription());
         userInfo.setDeleted(DeleteStatusEnums.NOT_DELETE.getCode());
         userInfo.setCreateTime(System.currentTimeMillis());
         userInfo.setUpdateTime(System.currentTimeMillis());
+        userInfoRepository.updateById(userInfo);
+        return Maps.newHashMap();
+    }
+
+    public Map<String, Object> resetPassword(Long userId) {
+        UserInfo userInfo = userInfoRepository.selectByUserId(userId);
+        if (userInfo == null) {
+            throw ServiceException.of(ErrorCode.PARAM_INVALID, "用户不存在");
+        }
+        userInfo.setPassword(userInfo.getUsername());
         userInfoRepository.updateById(userInfo);
         return Maps.newHashMap();
     }

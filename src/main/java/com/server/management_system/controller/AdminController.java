@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.server.management_system.constant.ErrorCode;
@@ -34,6 +35,7 @@ import com.server.management_system.vo.req.DeleteOrganizationReq;
 import com.server.management_system.vo.req.DeleteTeacherClassReq;
 import com.server.management_system.vo.req.DeleteUserReq;
 import com.server.management_system.vo.req.DivideClassReq;
+import com.server.management_system.vo.req.ResetPasswordReq;
 
 /**
  * @author jiangliang <jiangliang@kuaishou.com>
@@ -58,6 +60,14 @@ public class AdminController {
         } else {
             return RestRsp.success(adminService.editUser(addUserReq));
         }
+    }
+
+    @PostMapping("user/password/reset")
+    public RestRsp<Map<String, Object>> resetPassword(@RequestBody ResetPasswordReq resetPasswordReq) {
+        if (resetPasswordReq.getUserId() == null) {
+            throw ServiceException.of(ErrorCode.PARAM_INVALID, "传参错误");
+        }
+        return RestRsp.success(adminService.resetPassword(resetPasswordReq.getUserId()));
     }
 
     @GetMapping("user/list")
