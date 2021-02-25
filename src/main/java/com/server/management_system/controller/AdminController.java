@@ -67,7 +67,8 @@ public class AdminController {
         if (resetPasswordReq.getUserId() == null) {
             throw ServiceException.of(ErrorCode.PARAM_INVALID, "传参错误");
         }
-        return RestRsp.success(adminService.resetPassword(resetPasswordReq.getUserId()));
+        return RestRsp
+                .success(adminService.resetPassword(resetPasswordReq.getUserId(), resetPasswordReq.getPassword()));
     }
 
     @GetMapping("user/list")
