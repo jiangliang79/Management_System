@@ -125,12 +125,16 @@ public class AdminService {
         return Maps.newHashMap();
     }
 
-    public Map<String, Object> resetPassword(Long userId) {
+    public Map<String, Object> resetPassword(Long userId, String password) {
         UserInfo userInfo = userInfoRepository.selectByUserId(userId);
         if (userInfo == null) {
             throw ServiceException.of(ErrorCode.PARAM_INVALID, "用户不存在");
         }
-        userInfo.setPassword(userInfo.getUsername());
+        if (StringUtils.isEmpty(password)) {
+            userInfo.setPassword(userInfo.getUsername());
+        }else {
+            userInfo.setPassword(password);
+        }
         userInfoRepository.updateById(userInfo);
         return Maps.newHashMap();
     }

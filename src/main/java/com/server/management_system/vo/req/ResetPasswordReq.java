@@ -9,4 +9,5 @@ import lombok.Data;
 @Data
 public class ResetPasswordReq {
     private Long userId;
+    private String password;
 }
