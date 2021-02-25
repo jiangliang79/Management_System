@@ -12,4 +12,5 @@ public class AddProfessionReq {
     private Long collegeId;
     private Long professionId;
     private String professionName;
+    private String description;
 }

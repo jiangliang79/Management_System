@@ -9,11 +9,12 @@ import java.io.File;
 public class Test {
     public static void main(String[] args) {
         File path = new File(System.getProperty("user.dir") + "/src/main/resources");
-        File upload = new File(path.getAbsolutePath(), "file/");
+        File upload = new File(path.getAbsolutePath(), "/file/");
         File dest = new File(upload.getAbsolutePath() + "/fileName");
         if (!dest.getParentFile().exists()) {
             dest.getParentFile().mkdirs();// 新建文件夹
         }
+        System.out.println("ff/fff.xx".substring("ff/fff.xx".lastIndexOf(".")));
         System.out.println(dest.getAbsolutePath());
     }
 }

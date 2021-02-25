@@ -1,14 +1,10 @@
 package com.server.management_system.controller;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.Map;
-
+import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,8 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.google.common.collect.Maps;
 import com.server.management_system.constant.ErrorCode;
 import com.server.management_system.enums.OperatorTypeEnums;
 import com.server.management_system.exception.ServiceException;
@@ -41,6 +35,7 @@ import com.server.management_system.vo.req.DeleteOrganizationReq;
 import com.server.management_system.vo.req.DeleteTeacherClassReq;
 import com.server.management_system.vo.req.DeleteUserReq;
 import com.server.management_system.vo.req.DivideClassReq;
+import com.server.management_system.vo.req.EditArticleReq;
 import com.server.management_system.vo.req.ResetPasswordReq;
 
 
@@ -54,6 +49,7 @@ import com.server.management_system.vo.req.ResetPasswordReq;
 public class AdminController {
     @Autowired
     private AdminService adminService;
+
 
     @PostMapping("user/add")
     public RestRsp<Map<String, Object>> addOrEditUser(@RequestBody AddUserReq addUserReq) {
@@ -185,6 +181,28 @@ public class AdminController {
 
     @PostMapping("article/upload")
     public RestRsp<Map<String, Object>> uploadFile(@RequestParam("file") MultipartFile file) {
-       return adminService.uploadFile(file);
+        return adminService.uploadFile(file);
+    }
+
+    @PostMapping("article/edit")
+    public RestRsp<Map<String, Object>> editArticle(@RequestBody EditArticleReq editArticleReq) {
+        if (editArticleReq.getArticleId() == null || editArticleReq.getArticleType() == null
+                || editArticleReq.getEndTime() == null || editArticleReq.getStartTime() == null) {
+            throw ServiceException.of(ErrorCode.PARAM_INVALID, "传参错误");
+        }
+        return RestRsp.success(adminService.editArticle(editArticleReq));
+    }
+
+    @PostMapping("article/delete")
+    public RestRsp<Map<String, Object>> deleteArticle(@RequestBody EditArticleReq editArticleReq) {
+        if (editArticleReq.getArticleId() == null) {
+            throw ServiceException.of(ErrorCode.PARAM_INVALID, "传参错误");
+        }
+        return RestRsp.success(adminService.deleteArticle(editArticleReq.getArticleId()));
+    }
+
+    @PostMapping("article/preview")
+    public RestRsp<Map<String, Object>> previewArticle(@RequestBody EditArticleReq editArticleReq, HttpServletResponse response) {
+        return adminService.previewArticle(editArticleReq,response);
     }
 }

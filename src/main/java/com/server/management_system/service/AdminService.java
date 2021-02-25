@@ -1,18 +1,29 @@
 package com.server.management_system.service;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.annotation.Resource;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
 
-import org.apache.catalina.User;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+
+import com.documents4j.job.LocalConverter;
+
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.documents4j.api.DocumentType;
+import com.documents4j.api.IConverter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.server.management_system.constant.ErrorCode;
@@ -35,6 +46,7 @@ import com.server.management_system.domain.UserInfo;
 import com.server.management_system.enums.DeleteOrganizationEnums;
 import com.server.management_system.enums.DeleteStatusEnums;
 import com.server.management_system.enums.StudentTaskStatusEnums;
+import com.server.management_system.enums.TemplateEnums;
 import com.server.management_system.enums.UserTypeEnums;
 import com.server.management_system.exception.ServiceException;
 import com.server.management_system.param.PageRequestParam;
@@ -52,6 +64,7 @@ import com.server.management_system.vo.req.AddClassReq;
 import com.server.management_system.vo.req.AddProfessionReq;
 import com.server.management_system.vo.req.AddUserReq;
 import com.server.management_system.vo.req.DeleteOrganizationReq;
+import com.server.management_system.vo.req.EditArticleReq;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -139,7 +152,7 @@ public class AdminService {
         }
         if (StringUtils.isEmpty(password)) {
             userInfo.setPassword(userInfo.getUsername());
-        }else {
+        } else {
             userInfo.setPassword(password);
         }
         userInfoRepository.updateById(userInfo);
@@ -349,8 +362,8 @@ public class AdminService {
         professionInfo.setName(addProfessionReq.getProfessionName());
         professionInfo.setCreateTime(System.currentTimeMillis());
         professionInfo.setUpdateTime(System.currentTimeMillis());
+        professionInfo.setDescription(addProfessionReq.getDescription());
         professionInfo.setDeleted(DeleteStatusEnums.NOT_DELETE.getCode());
-        professionInfo.setDescription(StringUtils.EMPTY);
         professionInfoRepository.insert(professionInfo);
         return Maps.newHashMap();
     }
@@ -368,6 +381,7 @@ public class AdminService {
         professionInfo.setName(addProfessionReq.getProfessionName());
         professionInfo.setUpdateTime(System.currentTimeMillis());
         professionInfo.setDeleted(DeleteStatusEnums.NOT_DELETE.getCode());
+        professionInfo.setDescription(addProfessionReq.getDescription());
         professionInfoRepository.updateById(professionInfo);
         return Maps.newHashMap();
     }
@@ -609,7 +623,7 @@ public class AdminService {
         return RestListData.create(articleVoList.size(), articleVoList.subList(start, end));
     }
 
-    public RestRsp<Map<String, Object>> uploadFile(MultipartFile file){
+    public RestRsp<Map<String, Object>> uploadFile(MultipartFile file) {
         Map<String, Object> objectMap = Maps.newHashMap();
         try {
             if (file.isEmpty()) {
@@ -626,17 +640,97 @@ public class AdminService {
             // 设置文件存储路径
             File path = new File(System.getProperty("user.dir") + "/src/main/resources");
             File upload = new File(path.getAbsolutePath(), "/file");
-            File dest = new File(upload.getAbsolutePath() + fileName);
+            File dest = new File(upload.getAbsolutePath() + "/" + fileName);
             // 检测是否存在目录
             if (!dest.getParentFile().exists()) {
                 dest.getParentFile().mkdirs();// 新建文件夹
             }
             file.transferTo(dest);// 文件写入
+            ArticleInfo articleInfo = new ArticleInfo();
+            articleInfo.setName(fileName);
+            articleInfo.setPath("/src/main/resources/file/" + fileName);
+            articleInfo.setDeleted(DeleteStatusEnums.NOT_DELETE.getCode());
+            articleInfo.setTemplate(TemplateEnums.YES.getCode());
+            articleInfo.setStartTime(System.currentTimeMillis());
+            articleInfo.setEndTime(System.currentTimeMillis());
+            articleInfoRepository.insert(articleInfo);
             return RestRsp.success(objectMap);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return RestRsp.fail(ErrorCode.SERVER_ERROR, "上传失败");
+    }
+
+    public Map<String, Object> editArticle(EditArticleReq editArticleReq) {
+        ArticleInfo articleInfo = articleInfoRepository.selectByArticleId(editArticleReq.getArticleId());
+        if (articleInfo == null) {
+            throw ServiceException.of(ErrorCode.NOT_FOUNT, "该文件不存在");
+        }
+        articleInfo.setStartTime(editArticleReq.getStartTime());
+        articleInfo.setEndTime(editArticleReq.getEndTime());
+        articleInfo.setType(editArticleReq.getArticleType());
+        articleInfoRepository.updateById(articleInfo);
+        return Maps.newHashMap();
+    }
+
+    public Map<String, Object> deleteArticle(Long articleId) {
+        ArticleInfo articleInfo = articleInfoRepository.selectByArticleId(articleId);
+        if (articleInfo == null) {
+            throw ServiceException.of(ErrorCode.NOT_FOUNT, "该文件不存在");
+        }
+        articleInfo.setDeleted(DeleteStatusEnums.DELETED.getCode());
+        articleInfoRepository.updateById(articleInfo);
+        File file = new File(System.getProperty("user.dir") + articleInfo.getPath());
+        if (file.exists()) {
+            file.delete();
+        }
+        return Maps.newHashMap();
+    }
+
+    public RestRsp<Map<String, Object>> previewArticle(EditArticleReq editArticleReq, HttpServletResponse response) {
+        ArticleInfo articleInfo = articleInfoRepository.selectById(editArticleReq.getArticleId());
+        if (articleInfo == null) {
+            throw ServiceException.of(ErrorCode.NOT_FOUNT, "文件不存在");
+        }
+        File file = new File(System.getProperty("user.dir") + articleInfo.getPath());//需要转换的文件
+        try {
+            File newFile = new File(System.getProperty("user.dir") + "/src/main/resources/pdf");//转换之后文件生成的地址
+            if (!newFile.exists()) {
+                newFile.mkdirs();
+            }
+            String savePath = newFile.getAbsolutePath() + "/"; //pdf文件生成保存的路径
+            String fileName = "JCccc" + UUID.randomUUID().toString().replace("-", "").substring(0, 6);
+            String fileType = ".pdf"; //pdf文件后缀
+            String newFileMix = savePath + fileName + fileType;  //将这三个拼接起来,就是我们最后生成文件保存的完整访问路径了
+            String suffixName = articleInfo.getPath().substring(articleInfo.getPath().lastIndexOf("."));
+            if (suffixName.equals(fileType)) {
+                newFileMix = System.getProperty("user.dir") + articleInfo.getPath();
+            } else {
+                //文件转化
+                InputStream docxInputStream = new FileInputStream(file);
+                OutputStream outputStream = new FileOutputStream(new File(newFileMix));
+                IConverter converter = LocalConverter.builder().build();
+                if (suffixName.equals(".docx")) {
+                    converter.convert(docxInputStream).as(DocumentType.DOCX).to(outputStream).as(DocumentType.PDF)
+                            .execute();
+                } else if (suffixName.equals(".doc")) {
+                    converter.convert(docxInputStream).as(DocumentType.DOC).to(outputStream).as(DocumentType.PDF)
+                            .execute();
+                }
+                outputStream.close();
+            }
+            //converter.convert(file).to(new File(newFileMix)).execute();
+            //使用response,将pdf文件以流的方式发送的前端浏览器上
+            ServletOutputStream servletoutputStream = response.getOutputStream();
+            InputStream in = new FileInputStream(new File(newFileMix));// 读取文件
+            int i = IOUtils.copy(in, servletoutputStream);   // copy流数据,i为字节数
+            in.close();
+            servletoutputStream.close();
+            log.info("流已关闭,可预览,该文件字节大小：" + i);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return RestRsp.success(Maps.newHashMap());
     }
 
 }
