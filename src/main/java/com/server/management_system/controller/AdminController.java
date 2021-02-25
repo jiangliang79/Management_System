@@ -1,18 +1,23 @@
 package com.server.management_system.controller;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.google.common.collect.Maps;
 import com.server.management_system.constant.ErrorCode;
 import com.server.management_system.enums.OperatorTypeEnums;
 import com.server.management_system.exception.ServiceException;
@@ -37,6 +42,8 @@ import com.server.management_system.vo.req.DeleteUserReq;
 import com.server.management_system.vo.req.DivideClassReq;
 import com.server.management_system.vo.req.ResetPasswordReq;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * @author jiangliang <jiangliang@kuaishou.com>
  * Created on 2021-02-21
@@ -44,13 +51,15 @@ import com.server.management_system.vo.req.ResetPasswordReq;
 @RestController
 @RequestMapping("api/system/management")
 @CrossOrigin
+@Slf4j
 public class AdminController {
     @Autowired
     private AdminService adminService;
 
     @PostMapping("user/add")
     public RestRsp<Map<String, Object>> addOrEditUser(@RequestBody AddUserReq addUserReq) {
-        if (StringUtils.isEmpty(addUserReq.getUsername()) || StringUtils.isEmpty(addUserReq.getName()) || addUserReq.getOperatorType() == null
+        if (StringUtils.isEmpty(addUserReq.getUsername()) || StringUtils.isEmpty(addUserReq.getName())
+                || addUserReq.getOperatorType() == null
                 || addUserReq.getUserType() == null) {
             throw ServiceException.of(ErrorCode.PARAM_INVALID, "传参错误");
         }
@@ -173,5 +182,36 @@ public class AdminController {
     @GetMapping("article/list")
     public RestRsp<RestListData<ArticleVo>> getArticleList(PageRequestParam pageRequestParam, String search) {
         return RestRsp.success(adminService.getArticleList(pageRequestParam, search));
+    }
+
+    @PostMapping("article/upload")
+    public RestRsp<Map<String, Object>> uploadFile(@RequestParam("file") MultipartFile file) {
+        Map<String, Object> objectMap = Maps.newHashMap();
+        try {
+            if (file.isEmpty()) {
+                throw ServiceException.of(ErrorCode.PARAM_INVALID, "文件不能为空");
+            }
+            String fileName = file.getOriginalFilename();
+            if (StringUtils.isEmpty(fileName)) {
+                throw ServiceException.of(ErrorCode.PARAM_INVALID, "文件名不能为空");
+            }
+            log.info("上传的文件名为：" + fileName);
+            // 获取文件的后缀名
+            String suffixName = fileName.substring(fileName.lastIndexOf("."));
+            log.info("文件的后缀名为：" + suffixName);
+            // 设置文件存储路径
+            File path = new File(ResourceUtils.getURL("classpath:").getPath());
+            File upload = new File(path.getAbsolutePath(), "img/");
+            File dest = new File(upload.getAbsolutePath() + fileName);
+            // 检测是否存在目录
+            if (!dest.getParentFile().exists()) {
+                dest.getParentFile().mkdirs();// 新建文件夹
+            }
+            file.transferTo(dest);// 文件写入
+            return RestRsp.success(objectMap);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return RestRsp.fail(ErrorCode.SERVER_ERROR, "上传失败");
     }
 }
