@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.server.management_system.constant.ErrorCode;
+import com.server.management_system.domain.StudentGradeRecord;
 import com.server.management_system.enums.OperatorTypeEnums;
 import com.server.management_system.exception.ServiceException;
 import com.server.management_system.param.PageRequestParam;
@@ -28,6 +29,8 @@ import com.server.management_system.vo.CollegeVo;
 import com.server.management_system.vo.ProfessionVo;
 import com.server.management_system.vo.RestListData;
 import com.server.management_system.vo.RestRsp;
+import com.server.management_system.vo.StudentGradeRecordVo;
+import com.server.management_system.vo.StudentTaskArticleVo;
 import com.server.management_system.vo.StudentVo;
 import com.server.management_system.vo.TeacherClassVo;
 import com.server.management_system.vo.TeacherTaskReleaseVo;
@@ -37,6 +40,7 @@ import com.server.management_system.vo.req.AddClassReq;
 import com.server.management_system.vo.req.AddProfessionReq;
 import com.server.management_system.vo.req.AddUserReq;
 import com.server.management_system.vo.req.DeleteOrganizationReq;
+import com.server.management_system.vo.req.DeleteRecordReq;
 import com.server.management_system.vo.req.DeleteTeacherClassReq;
 import com.server.management_system.vo.req.DeleteUserReq;
 import com.server.management_system.vo.req.DivideClassReq;
@@ -217,4 +221,31 @@ public class AdminController {
             PageRequestParam pageRequestParam, String search) {
         return RestRsp.success(adminService.getTeacherReleaseList(teacherId, collegeId, pageRequestParam, search));
     }
+
+    @GetMapping("student/grade/list")
+    public RestRsp<RestListData<StudentGradeRecordVo>> getStudentGradeList(Long teacherId, Long collegeId,
+            PageRequestParam pageRequestParam, String search) {
+        return RestRsp.success(adminService.getStudentGradeList(teacherId, collegeId, pageRequestParam, search));
+    }
+
+    @PostMapping("record/delete")
+    public RestRsp<Map<String, Object>> deleteRecord(@RequestBody DeleteRecordReq deleteRecordReq) {
+        if (deleteRecordReq.getRecordId() == null || deleteRecordReq.getType() == null) {
+            throw ServiceException.of(ErrorCode.PARAM_INVALID, "参数错误");
+        }
+        return RestRsp.success(adminService.deleteRecord(deleteRecordReq.getRecordId(), deleteRecordReq.getType()));
+    }
+
+    @GetMapping("article/download")
+    public RestRsp<Map<String, Object>> articleDownload(Long articleId, HttpServletResponse response) {
+        return RestRsp.success(adminService.articleDownload(articleId, response));
+    }
+
+    @GetMapping("student/task/article/list")
+    public RestRsp<RestListData<StudentTaskArticleVo>> getStudentTaskList(Long teacherId, Long collegeId,
+            PageRequestParam pageRequestParam, String search) {
+        return RestRsp.success(adminService.getStudentTaskList(teacherId, collegeId, pageRequestParam, search));
+    }
+
+
 }

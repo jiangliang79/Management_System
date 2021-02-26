@@ -1,8 +1,11 @@
 package com.server.management_system.service;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -20,6 +23,7 @@ import org.jodconverter.office.OfficeException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.baomidou.mybatisplus.extension.api.R;
@@ -30,6 +34,7 @@ import com.server.management_system.dao.ArticleInfoRepository;
 import com.server.management_system.dao.ClassInfoRepository;
 import com.server.management_system.dao.CollegeInfoRepository;
 import com.server.management_system.dao.ProfessionInfoRepository;
+import com.server.management_system.dao.StudentGradeRecordRepository;
 import com.server.management_system.dao.StudentInfoRepository;
 import com.server.management_system.dao.StudentTaskArticleRepository;
 import com.server.management_system.dao.TeacherClassRelationRepository;
@@ -39,6 +44,7 @@ import com.server.management_system.domain.ArticleInfo;
 import com.server.management_system.domain.ClassInfo;
 import com.server.management_system.domain.CollegeInfo;
 import com.server.management_system.domain.ProfessionInfo;
+import com.server.management_system.domain.StudentGradeRecord;
 import com.server.management_system.domain.StudentInfo;
 import com.server.management_system.domain.StudentTaskArticle;
 import com.server.management_system.domain.TeacherClassRelation;
@@ -46,6 +52,7 @@ import com.server.management_system.domain.TeacherReleaseRecord;
 import com.server.management_system.domain.UserInfo;
 import com.server.management_system.enums.DeleteOrganizationEnums;
 import com.server.management_system.enums.DeleteStatusEnums;
+import com.server.management_system.enums.RecordTypeEnums;
 import com.server.management_system.enums.StudentTaskStatusEnums;
 import com.server.management_system.enums.TemplateEnums;
 import com.server.management_system.enums.UserTypeEnums;
@@ -57,6 +64,8 @@ import com.server.management_system.vo.CollegeVo;
 import com.server.management_system.vo.ProfessionVo;
 import com.server.management_system.vo.RestListData;
 import com.server.management_system.vo.RestRsp;
+import com.server.management_system.vo.StudentGradeRecordVo;
+import com.server.management_system.vo.StudentTaskArticleVo;
 import com.server.management_system.vo.StudentVo;
 import com.server.management_system.vo.TeacherClassVo;
 import com.server.management_system.vo.TeacherTaskReleaseVo;
@@ -66,6 +75,7 @@ import com.server.management_system.vo.req.AddClassReq;
 import com.server.management_system.vo.req.AddProfessionReq;
 import com.server.management_system.vo.req.AddUserReq;
 import com.server.management_system.vo.req.DeleteOrganizationReq;
+import com.server.management_system.vo.req.DeleteRecordReq;
 import com.server.management_system.vo.req.EditArticleReq;
 
 import lombok.extern.slf4j.Slf4j;
@@ -97,6 +107,8 @@ public class AdminService {
     private TeacherReleaseRecordRepository teacherReleaseRecordRepository;
     @Autowired(required = false)
     private DocumentConverter converter;
+    @Resource
+    private StudentGradeRecordRepository studentGradeRecordRepository;
 
     public Map<String, Object> addUser(AddUserReq addUserReq) {
         UserInfo userInfo = new UserInfo();
@@ -780,5 +792,192 @@ public class AdminService {
         int start = pageRequestParam.getStart();
         int end = Math.min(start + pageRequestParam.getPageSize(), teacherTaskReleaseVos.size());
         return RestListData.create(teacherTaskReleaseVos.size(), teacherTaskReleaseVos.subList(start, end));
+    }
+
+    public RestListData<StudentGradeRecordVo> getStudentGradeList(Long teacherId, Long collegeId,
+            PageRequestParam pageRequestParam, String search) {
+        List<StudentGradeRecordVo> studentGradeRecordVoList = Lists.newArrayList();
+        List<StudentGradeRecord> studentGradeRecordList;
+        if (teacherId == null && collegeId == null) {
+            studentGradeRecordList = studentGradeRecordRepository.selectAllList();
+        } else if (teacherId == null) {
+            List<ClassInfo> classInfoList = classInfoRepository.selectByCollegeId(collegeId);
+            List<Long> classIds = Lists.newArrayList();
+            if (CollectionUtils.isEmpty(classInfoList)) {
+                return RestListData.create(studentGradeRecordVoList.size(), studentGradeRecordVoList);
+            }
+            for (ClassInfo classInfo : classInfoList) {
+                classIds.add(classInfo.getId());
+            }
+            studentGradeRecordList = studentGradeRecordRepository.selectByClassIds(classIds);
+        } else {
+            studentGradeRecordList = studentGradeRecordRepository.selectByTeacherId(teacherId);
+        }
+        for (StudentGradeRecord studentGradeRecord : studentGradeRecordList) {
+            StudentGradeRecordVo studentGradeRecordVo = new StudentGradeRecordVo();
+            studentGradeRecordVo.setRecordId(studentGradeRecord.getId());
+            studentGradeRecordVo.setArticleId(studentGradeRecord.getArticleId());
+            ArticleInfo articleInfo = articleInfoRepository.selectByArticleId(studentGradeRecord.getArticleId());
+            if (articleInfo != null) {
+                studentGradeRecordVo.setArticleName(articleInfo.getName());
+            }
+            StudentInfo studentInfo = studentInfoRepository.selectByStudentId(studentGradeRecord.getStudentId());
+            if (studentInfo != null) {
+                studentGradeRecordVo.setStudentName(studentInfo.getName());
+            }
+            studentGradeRecordVo.setReleaseTime(studentGradeRecord.getReleaseTime());
+            UserInfo userInfo = userInfoRepository.selectByUserId(studentGradeRecord.getTeacherId());
+            studentGradeRecordVo.setTeacherId(studentGradeRecord.getTeacherId());
+            if (userInfo != null) {
+                studentGradeRecordVo.setTeacherName(userInfo.getName());
+            }
+            ClassInfo classInfo = classInfoRepository.selectByClassId(studentGradeRecord.getClassId());
+            if (classInfo != null) {
+                CollegeInfo collegeInfo = collegeInfoRepository.selectByCollegeId(classInfo.getCollegeId());
+                ProfessionInfo professionInfo =
+                        professionInfoRepository.selectByProfessionId(classInfo.getProfessionId());
+                if (professionInfo != null) {
+                    studentGradeRecordVo.setProfessionName(professionInfo.getName());
+                }
+                if (collegeInfo != null) {
+                    studentGradeRecordVo.setCollegeName(collegeInfo.getName());
+                }
+                studentGradeRecordVo.setClassName(classInfo.getName());
+            }
+            if (StringUtils.containsIgnoreCase(studentGradeRecordVo.getArticleName(), search) || StringUtils
+                    .containsIgnoreCase(studentGradeRecordVo.getTeacherName(), search) || StringUtils
+                    .containsIgnoreCase(studentGradeRecordVo.getStudentName(), search)) {
+                studentGradeRecordVoList.add(studentGradeRecordVo);
+            }
+        }
+        int start = pageRequestParam.getStart();
+        int end = Math.min(start + pageRequestParam.getPageSize(), studentGradeRecordVoList.size());
+        return RestListData.create(studentGradeRecordVoList.size(), studentGradeRecordVoList.subList(start, end));
+    }
+
+    public Map<String, Object> deleteRecord(Long recordId, Integer type) {
+        if (type.equals(RecordTypeEnums.TEACHER.getCode())) {
+            TeacherReleaseRecord teacherReleaseRecord = teacherReleaseRecordRepository.selectByRecordId(recordId);
+            if (teacherReleaseRecord == null) {
+                throw ServiceException.of(ErrorCode.NOT_FOUNT, "该记录不存在");
+            }
+            teacherReleaseRecord.setDeleted(DeleteStatusEnums.DELETED.getCode());
+            teacherReleaseRecordRepository.updateById(teacherReleaseRecord);
+            ArticleInfo articleInfo = articleInfoRepository.selectByArticleId(teacherReleaseRecord.getArticleId());
+            if (articleInfo != null) {
+                deleteArticle(articleInfo.getId());
+            }
+        } else {
+            StudentGradeRecord studentGradeRecord = studentGradeRecordRepository.selectByRecordId(recordId);
+            if (studentGradeRecord == null) {
+                throw ServiceException.of(ErrorCode.NOT_FOUNT, "该记录不存在");
+            }
+            ArticleInfo articleInfo = articleInfoRepository.selectByArticleId(studentGradeRecord.getArticleId());
+            studentGradeRecord.setDeleted(DeleteStatusEnums.DELETED.getCode());
+            studentGradeRecordRepository.updateById(studentGradeRecord);
+            if (articleInfo != null) {
+                deleteArticle(articleInfo.getId());
+            }
+        }
+        return Maps.newHashMap();
+    }
+
+    public Map<String, Object> articleDownload(Long articleId, HttpServletResponse response) {
+        ArticleInfo articleInfo = articleInfoRepository.selectByArticleId(articleId);
+        if (articleInfo == null) {
+            throw ServiceException.of(ErrorCode.NOT_FOUNT, "该文件不存在");
+        }
+        File file = new File(System.getProperty("user.dir") + articleInfo.getPath());
+        if (file.exists()) {
+            response.setHeader("content-type", "application/octet-stream");
+            response.setContentType("application/force-download");// 设置强制下载不打开
+            response.addHeader("Content-Disposition", "attachment;fileName=" + articleInfo.getName());// 设置文件名
+            byte[] buffer = new byte[1024];
+            FileInputStream fis = null;
+            BufferedInputStream bis = null;
+            try {
+                fis = new FileInputStream(file);
+                bis = new BufferedInputStream(fis);
+                OutputStream os = response.getOutputStream();
+                int i = bis.read(buffer);
+                while (i != -1) {
+                    os.write(buffer, 0, i);
+                    i = bis.read(buffer);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (bis != null) {
+                    try {
+                        bis.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (fis != null) {
+                    try {
+                        fis.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        return Maps.newHashMap();
+    }
+
+    public RestListData<StudentTaskArticleVo> getStudentTaskList(Long teacherId, Long collegeId,
+            PageRequestParam pageRequestParam, String search) {
+        List<StudentTaskArticleVo> studentTaskArticleVoList = Lists.newArrayList();
+        List<StudentTaskArticle> studentTaskArticleList;
+        if (teacherId == null && collegeId == null) {
+            studentTaskArticleList = studentTaskArticleRepository.selectByStatus();
+        } else if (teacherId == null) {
+            List<Long> classIds = Lists.newArrayList();
+            List<ClassInfo> classInfoList = classInfoRepository.selectByCollegeId(collegeId);
+            if (CollectionUtils.isEmpty(classInfoList)) {
+                return RestListData.create(studentTaskArticleVoList.size(), studentTaskArticleVoList);
+            }
+            classInfoList.forEach(classInfo -> {
+                classIds.add(classInfo.getId());
+            });
+            studentTaskArticleList = studentTaskArticleRepository.selectByClassIds(classIds);
+        } else {
+            studentTaskArticleList = studentTaskArticleRepository.selectByTeacherId(teacherId);
+        }
+        for (StudentTaskArticle studentTaskArticle : studentTaskArticleList) {
+            StudentTaskArticleVo studentTaskArticleVo = new StudentTaskArticleVo();
+            studentTaskArticleVo.setArticleId(studentTaskArticle.getArticleId());
+            studentTaskArticleVo.setTaskId(studentTaskArticle.getId());
+            StudentInfo studentInfo = studentInfoRepository.selectByStudentId(studentTaskArticle.getStudentId());
+            if (studentInfo != null) {
+                studentTaskArticleVo.setStudentName(studentInfo.getName());
+            }
+            ArticleInfo articleInfo = articleInfoRepository.selectByArticleId(studentTaskArticle.getArticleId());
+            if (articleInfo != null) {
+                studentTaskArticleVo.setArticleName(articleInfo.getName());
+            }
+            studentTaskArticleVo.setUpdateTime(studentTaskArticle.getUpdateTime());
+            ClassInfo classInfo = classInfoRepository.selectByClassId(studentTaskArticle.getClassId());
+            if (classInfo != null) {
+                ProfessionInfo professionInfo =
+                        professionInfoRepository.selectByProfessionId(classInfo.getProfessionId());
+                CollegeInfo collegeInfo = collegeInfoRepository.selectByCollegeId(classInfo.getCollegeId());
+                if (collegeInfo != null) {
+                    studentTaskArticleVo.setCollegeName(collegeInfo.getName());
+                }
+                if (professionInfo != null) {
+                    studentTaskArticleVo.setProfessionName(professionInfo.getName());
+                }
+                studentTaskArticleVo.setClassName(classInfo.getName());
+            }
+            if (StringUtils.containsIgnoreCase(studentTaskArticleVo.getArticleName(), search) || StringUtils
+                    .containsIgnoreCase(studentTaskArticleVo.getStudentName(), search)) {
+                studentTaskArticleVoList.add(studentTaskArticleVo);
+            }
+        }
+        int start = pageRequestParam.getStart();
+        int end = Math.min(start + pageRequestParam.getPageSize(), studentTaskArticleVoList.size());
+        return RestListData.create(studentTaskArticleVoList.size(), studentTaskArticleVoList.subList(start, end));
     }
 }
