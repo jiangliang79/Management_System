@@ -18,6 +18,6 @@ public interface CollegeInfoRepository extends BaseMapper<CollegeInfo> {
     @Select("select * from college_info where deleted = 0")
     List<CollegeInfo> getCollegeList();
 
-    @Select("select * from college_info where deleted = 0 and id = #{id}")
+    @Select("select * from college_info where deleted = 0 and college_id = #{id}")
     CollegeInfo selectByCollegeId(@Param("id") Long id);
 }

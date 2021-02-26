@@ -22,6 +22,7 @@ create table user_info
 create table college_info
 (
     id          bigint unsigned not null auto_increment comment '学院ID',
+    college_id  bigint          not null default 0  comment '学院ID',
     name        varchar(128)    not null default '' comment '学院名称',
     description varchar(1024)   not null default '' comment '备注',
     deleted     int             not null default 0  comment '是否删除,1已删除，0未删除',
@@ -33,6 +34,8 @@ create table college_info
     ENGINE = InnoDB
     DEFAULT CHARSET = utf8mb4
     COLLATE = utf8mb4_bin COMMENT = '学院信息表';
+
+alter table  college_info add(college_id  bigint          not null default 0  comment '学院ID')
 
 create table profession_info
 (
@@ -93,7 +96,7 @@ create table student_info
     id_card        bigint          not null default 0      comment '身份证号',
     student_number bigint          not null default 0      comment '学号',
     native_place   varchar(1024)   not null default ''     comment '籍贯',
-    now_place      varchar(1024)   not null default 0      comment '现居住地',
+    now_place      varchar(1024)   not null default ''     comment '现居住地',
     deleted        int             not null default 0      comment '是否删除,1已删除，0未删除',
     create_time    bigint          not null default 0      comment '创建时间',
     update_time    bigint          not null default 0      comment '修改时间',

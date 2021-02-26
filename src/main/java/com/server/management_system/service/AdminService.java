@@ -72,7 +72,6 @@ import com.server.management_system.vo.req.AddClassReq;
 import com.server.management_system.vo.req.AddProfessionReq;
 import com.server.management_system.vo.req.AddUserReq;
 import com.server.management_system.vo.req.DeleteOrganizationReq;
-import com.server.management_system.vo.req.DeleteRecordReq;
 import com.server.management_system.vo.req.EditArticleReq;
 
 import lombok.extern.slf4j.Slf4j;
@@ -133,7 +132,7 @@ public class AdminService {
             studentInfoRepository.insert(studentInfo);
         } else if (addUserReq.getUserType().equals(UserTypeEnums.COLLEGE.getCode())) {
             CollegeInfo collegeInfo = new CollegeInfo();
-            collegeInfo.setId(userInfo.getId());
+            collegeInfo.setCollegeId(userInfo.getId());
             collegeInfo.setName(userInfo.getName());
             collegeInfo.setDeleted(DeleteStatusEnums.NOT_DELETE.getCode());
             collegeInfo.setCreateTime(System.currentTimeMillis());
@@ -233,7 +232,7 @@ public class AdminService {
         }
         for (CollegeInfo collegeInfo : collegeInfoList) {
             CollegeVo collegeVo = new CollegeVo();
-            collegeVo.setCollegeId(collegeInfo.getId());
+            collegeVo.setCollegeId(collegeInfo.getCollegeId());
             collegeVo.setCollegeName(collegeInfo.getName());
             collegeVo.setCreateTime(collegeInfo.getCreateTime());
             collegeVo.setDescription(collegeInfo.getDescription());

@@ -13,6 +13,7 @@ import lombok.Data;
 public class CollegeInfo {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
+    private Long collegeId;
     private String name;
     private String description;
     private Integer deleted;
