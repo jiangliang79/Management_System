@@ -20,4 +20,7 @@ public interface ArticleInfoRepository extends BaseMapper<ArticleInfo> {
 
     @Select("select * from article_info where deleted = 0 and id = #{id} limit 1")
     ArticleInfo selectByArticleId(@Param("id") Long articleId);
+
+    @Select("select * from article_info where type in (2,3) and template = #{template}")
+    List<ArticleInfo> selectTaskByTemplate(@Param("template") Integer template);
 }
