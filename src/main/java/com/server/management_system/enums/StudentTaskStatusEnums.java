@@ -7,7 +7,8 @@ package com.server.management_system.enums;
 public enum StudentTaskStatusEnums {
     SUCCESS(0, "通过"),
     FAIL(1, "未通过"),
-    UNKNOWN(2, "未填写");
+    UNKNOWN(2, "未填写"),
+    NOT_MARK(3, "待批阅");
     private int code;
     private String desc;
 
