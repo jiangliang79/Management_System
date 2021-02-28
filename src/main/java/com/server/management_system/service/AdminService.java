@@ -101,7 +101,7 @@ public class AdminService {
     private ArticleInfoRepository articleInfoRepository;
     @Resource
     private TeacherReleaseRecordRepository teacherReleaseRecordRepository;
-    @Autowired(required = false)
+    @Autowired
     private DocumentConverter converter;
     @Resource
     private StudentGradeRecordRepository studentGradeRecordRepository;
