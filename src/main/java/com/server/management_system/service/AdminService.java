@@ -942,31 +942,7 @@ public class AdminService {
             studentTaskArticleList = studentTaskArticleRepository.selectByTeacherId(teacherId);
         }
         for (StudentTaskArticle studentTaskArticle : studentTaskArticleList) {
-            StudentTaskArticleVo studentTaskArticleVo = new StudentTaskArticleVo();
-            studentTaskArticleVo.setArticleId(studentTaskArticle.getArticleId());
-            studentTaskArticleVo.setTaskId(studentTaskArticle.getId());
-            StudentInfo studentInfo = studentInfoRepository.selectByStudentId(studentTaskArticle.getStudentId());
-            if (studentInfo != null) {
-                studentTaskArticleVo.setStudentName(studentInfo.getName());
-            }
-            ArticleInfo articleInfo = articleInfoRepository.selectByArticleId(studentTaskArticle.getArticleId());
-            if (articleInfo != null) {
-                studentTaskArticleVo.setArticleName(articleInfo.getName());
-            }
-            studentTaskArticleVo.setUpdateTime(studentTaskArticle.getUpdateTime());
-            ClassInfo classInfo = classInfoRepository.selectByClassId(studentTaskArticle.getClassId());
-            if (classInfo != null) {
-                ProfessionInfo professionInfo =
-                        professionInfoRepository.selectByProfessionId(classInfo.getProfessionId());
-                CollegeInfo collegeInfo = collegeInfoRepository.selectByCollegeId(classInfo.getCollegeId());
-                if (collegeInfo != null) {
-                    studentTaskArticleVo.setCollegeName(collegeInfo.getName());
-                }
-                if (professionInfo != null) {
-                    studentTaskArticleVo.setProfessionName(professionInfo.getName());
-                }
-                studentTaskArticleVo.setClassName(classInfo.getName());
-            }
+            StudentTaskArticleVo studentTaskArticleVo = getStudentTaskArticleVo(studentTaskArticle);
             if (StringUtils.containsIgnoreCase(studentTaskArticleVo.getArticleName(), search) || StringUtils
                     .containsIgnoreCase(studentTaskArticleVo.getStudentName(), search)) {
                 studentTaskArticleVoList.add(studentTaskArticleVo);
@@ -977,5 +953,33 @@ public class AdminService {
         return RestListData.create(studentTaskArticleVoList.size(), studentTaskArticleVoList.subList(start, end));
     }
 
+    public StudentTaskArticleVo getStudentTaskArticleVo(StudentTaskArticle studentTaskArticle) {
+        StudentTaskArticleVo studentTaskArticleVo = new StudentTaskArticleVo();
+        studentTaskArticleVo.setArticleId(studentTaskArticle.getArticleId());
+        studentTaskArticleVo.setTaskId(studentTaskArticle.getId());
+        StudentInfo studentInfo = studentInfoRepository.selectByStudentId(studentTaskArticle.getStudentId());
+        if (studentInfo != null) {
+            studentTaskArticleVo.setStudentName(studentInfo.getName());
+        }
+        ArticleInfo articleInfo = articleInfoRepository.selectByArticleId(studentTaskArticle.getArticleId());
+        if (articleInfo != null) {
+            studentTaskArticleVo.setArticleName(articleInfo.getName());
+        }
+        studentTaskArticleVo.setUpdateTime(studentTaskArticle.getUpdateTime());
+        ClassInfo classInfo = classInfoRepository.selectByClassId(studentTaskArticle.getClassId());
+        if (classInfo != null) {
+            ProfessionInfo professionInfo =
+                    professionInfoRepository.selectByProfessionId(classInfo.getProfessionId());
+            CollegeInfo collegeInfo = collegeInfoRepository.selectByCollegeId(classInfo.getCollegeId());
+            if (collegeInfo != null) {
+                studentTaskArticleVo.setCollegeName(collegeInfo.getName());
+            }
+            if (professionInfo != null) {
+                studentTaskArticleVo.setProfessionName(professionInfo.getName());
+            }
+            studentTaskArticleVo.setClassName(classInfo.getName());
+        }
+        return studentTaskArticleVo;
+    }
 
 }

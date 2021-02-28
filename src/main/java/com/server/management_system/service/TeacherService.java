@@ -143,4 +143,17 @@ public class TeacherService {
         }
         return RestRsp.fail(ErrorCode.SERVER_ERROR, "任务发布失败");
     }
+
+    public Map<String, Object> checkTaskArticle(Long taskId, Integer status, String remark) {
+        StudentTaskArticle studentTaskArticle = studentTaskArticleRepository.selectByTaskId(taskId);
+        if (studentTaskArticle == null) {
+            throw ServiceException.of(ErrorCode.NOT_FOUNT, "该任务不存在");
+        }
+        studentTaskArticle.setStatus(status);
+        if (StringUtils.isNotEmpty(remark)) {
+            studentTaskArticle.setRemark(remark);
+        }
+        studentTaskArticleRepository.updateById(studentTaskArticle);
+        return Maps.newHashMap();
+    }
 }

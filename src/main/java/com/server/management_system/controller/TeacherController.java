@@ -19,6 +19,7 @@ import com.server.management_system.service.TeacherService;
 import com.server.management_system.vo.RestListData;
 import com.server.management_system.vo.RestRsp;
 import com.server.management_system.vo.TeacherTaskArticleVo;
+import com.server.management_system.vo.req.CheckTaskArticleReq;
 
 /**
  * @author jiangliang <jiangliang@kuaishou.com>
@@ -44,6 +45,16 @@ public class TeacherController {
             throw ServiceException.of(ErrorCode.PARAM_INVALID, "teacherId不能为空");
         }
         return teacherService.teacherTaskRelease(teacherId, file);
+    }
+
+    @PostMapping("teacher/task/article/check")
+    public RestRsp<Map<String, Object>> checkTaskArticle(@RequestBody CheckTaskArticleReq checkTaskArticleReq) {
+        if (checkTaskArticleReq.getTaskId() == null || checkTaskArticleReq.getStatus() == null) {
+            throw ServiceException.of(ErrorCode.PARAM_INVALID, "taskId或status不能为空");
+        }
+        return RestRsp.success(teacherService
+                .checkTaskArticle(checkTaskArticleReq.getTaskId(), checkTaskArticleReq.getStatus(),
+                        checkTaskArticleReq.getRemark()));
     }
 
 
