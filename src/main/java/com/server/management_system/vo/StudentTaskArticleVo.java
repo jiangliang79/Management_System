@@ -17,4 +17,6 @@ public class StudentTaskArticleVo {
     private String collegeName;
     private String professionName;
     private String className;
+    private Long createTime;
+    private Long endTime;
 }

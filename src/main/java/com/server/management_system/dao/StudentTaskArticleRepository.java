@@ -19,6 +19,9 @@ public interface StudentTaskArticleRepository extends BaseMapper<StudentTaskArti
     @Select("select * from student_task_article where student_id = #{studentId} and deleted = 0")
     List<StudentTaskArticle> selectByStudentId(@Param("studentId") Long studentId);
 
+    @Select("select * from student_task_article where student_id = #{studentId} and deleted = 0 and status in (0,1,3)")
+    List<StudentTaskArticle> selectStatusByStudentId(@Param("studentId") Long studentId);
+
     @Select("select * from student_task_article where deleted = 0 and status in(0,1)")
     List<StudentTaskArticle> selectByStatus();
 
@@ -31,4 +34,7 @@ public interface StudentTaskArticleRepository extends BaseMapper<StudentTaskArti
 
     @Select("select * from student_task_article where id = #{taskId} and deleted = 0 limit 1")
     StudentTaskArticle selectByTaskId(@Param("taskId") Long taskId);
+
+    @Select("select * from student_task_article where deleted = 0 and status = 3 and teacher_id = #{teacherId}")
+    List<StudentTaskArticle> selectNotMarkListByTeacherId(@Param("teacherId") Long teacherId);
 }

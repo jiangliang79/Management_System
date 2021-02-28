@@ -566,42 +566,7 @@ public class AdminService {
         }
         String finalSearch = search;
         studentInfoList.forEach(studentInfo -> {
-            StudentVo studentVo = new StudentVo();
-            studentVo.setStudentId(studentInfo.getStudentId());
-            studentVo.setStudentName(studentInfo.getName());
-            studentVo.setStudentNumber(studentInfo.getStudentNumber());
-            studentVo.setNativePlace(studentInfo.getNativePlace());
-            studentVo.setNowPlace(studentInfo.getNowPlace());
-            studentVo.setSex(studentInfo.getSex());
-            ClassInfo classInfo = classInfoRepository.selectByClassId(studentInfo.getClassId());
-            if (classInfo != null) {
-                studentVo.setClassId(classInfo.getId());
-                studentVo.setClassName(classInfo.getName());
-                studentVo.setProfessionId(classInfo.getProfessionId());
-                studentVo.setCollegeId(classInfo.getCollegeId());
-                CollegeInfo collegeInfo = collegeInfoRepository.selectByCollegeId(classInfo.getCollegeId());
-                if (collegeInfo != null) {
-                    studentVo.setCollegeName(collegeInfo.getName());
-                }
-                ProfessionInfo professionInfo =
-                        professionInfoRepository.selectByProfessionId(classInfo.getProfessionId());
-                if (professionInfo != null) {
-                    studentVo.setProfessionName(professionInfo.getName());
-                }
-            }
-            List<StudentTaskArticle> studentTaskArticleList =
-                    studentTaskArticleRepository.selectByStudentId(studentInfo.getStudentId());
-            if (CollectionUtils.isEmpty(studentTaskArticleList)) {
-                studentVo.setStatus(1);
-            } else {
-                studentVo.setStatus(1);
-                studentTaskArticleList.forEach(studentTaskArticle -> {
-                    if (studentTaskArticle.getStatus().equals(StudentTaskStatusEnums.UNKNOWN.getCode())
-                            || studentTaskArticle.getStatus().equals(StudentTaskStatusEnums.FAIL.getCode())) {
-                        studentVo.setStatus(0);
-                    }
-                });
-            }
+           StudentVo studentVo = getStudentVo(studentInfo);
             if (StringUtils.containsIgnoreCase(studentVo.getStudentName(), finalSearch) || StringUtils
                     .containsIgnoreCase(studentVo.getClassName(), finalSearch) || StringUtils
                     .containsIgnoreCase(studentVo.getCollegeName(), finalSearch) || StringUtils
@@ -612,6 +577,46 @@ public class AdminService {
         int start = pageRequestParam.getStart();
         int end = Math.min(start + pageRequestParam.getPageSize(), studentVoList.size());
         return RestListData.create(studentVoList.size(), studentVoList.subList(start, end));
+    }
+
+    public StudentVo getStudentVo(StudentInfo studentInfo){
+        StudentVo studentVo = new StudentVo();
+        studentVo.setStudentId(studentInfo.getStudentId());
+        studentVo.setStudentName(studentInfo.getName());
+        studentVo.setStudentNumber(studentInfo.getStudentNumber());
+        studentVo.setNativePlace(studentInfo.getNativePlace());
+        studentVo.setNowPlace(studentInfo.getNowPlace());
+        studentVo.setSex(studentInfo.getSex());
+        ClassInfo classInfo = classInfoRepository.selectByClassId(studentInfo.getClassId());
+        if (classInfo != null) {
+            studentVo.setClassId(classInfo.getId());
+            studentVo.setClassName(classInfo.getName());
+            studentVo.setProfessionId(classInfo.getProfessionId());
+            studentVo.setCollegeId(classInfo.getCollegeId());
+            CollegeInfo collegeInfo = collegeInfoRepository.selectByCollegeId(classInfo.getCollegeId());
+            if (collegeInfo != null) {
+                studentVo.setCollegeName(collegeInfo.getName());
+            }
+            ProfessionInfo professionInfo =
+                    professionInfoRepository.selectByProfessionId(classInfo.getProfessionId());
+            if (professionInfo != null) {
+                studentVo.setProfessionName(professionInfo.getName());
+            }
+        }
+        List<StudentTaskArticle> studentTaskArticleList =
+                studentTaskArticleRepository.selectByStudentId(studentInfo.getStudentId());
+        if (CollectionUtils.isEmpty(studentTaskArticleList)) {
+            studentVo.setStatus(1);
+        } else {
+            studentVo.setStatus(1);
+            studentTaskArticleList.forEach(studentTaskArticle -> {
+                if (studentTaskArticle.getStatus().equals(StudentTaskStatusEnums.UNKNOWN.getCode())
+                        || studentTaskArticle.getStatus().equals(StudentTaskStatusEnums.FAIL.getCode())) {
+                    studentVo.setStatus(0);
+                }
+            });
+        }
+        return studentVo;
     }
 
     public RestListData<ArticleVo> getArticleList(PageRequestParam pageRequestParam, String search) {

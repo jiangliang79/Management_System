@@ -22,5 +22,8 @@ public interface ArticleInfoRepository extends BaseMapper<ArticleInfo> {
     ArticleInfo selectByArticleId(@Param("id") Long articleId);
 
     @Select("select * from article_info where type in (2,3) and template = #{template}")
-    List<ArticleInfo> selectTaskByTemplate(@Param("template") Integer template);
+    List<ArticleInfo> selectTaskByTemplateAndNotGrade(@Param("template") Integer template);
+
+    @Select("select * from article_info where type =1 and template = #{template}")
+    List<ArticleInfo> selectTaskByTemplateAndGrade(@Param("template") Integer template);
 }
