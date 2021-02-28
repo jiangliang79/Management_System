@@ -149,6 +149,38 @@ public class AdminService {
             throw ServiceException.of(ErrorCode.NOT_FOUNT, "用户不存在");
         }
         userInfo.setUsername(addUserReq.getUsername());
+        if (!addUserReq.getUserType().equals(userInfo.getType()) && userInfo.getType()
+                .equals(UserTypeEnums.STUDENT.getCode())) {
+            StudentInfo studentInfo = studentInfoRepository.selectByStudentId(userInfo.getId());
+            studentInfo.setDeleted(DeleteStatusEnums.DELETED.getCode());
+            studentInfoRepository.updateById(studentInfo);
+        } else if (!addUserReq.getUserType().equals(userInfo.getType()) && userInfo.getType()
+                .equals(UserTypeEnums.COLLEGE.getCode())) {
+            CollegeInfo collegeInfo = collegeInfoRepository.selectByCollegeId(userInfo.getId());
+            collegeInfo.setDeleted(DeleteStatusEnums.DELETED.getCode());
+            collegeInfoRepository.updateById(collegeInfo);
+        }
+        if (!addUserReq.getUserType().equals(userInfo.getType()) && addUserReq.getUserType()
+                .equals(UserTypeEnums.STUDENT.getCode())) {
+            StudentInfo studentInfo = new StudentInfo();
+            studentInfo.setName(userInfo.getName());
+            studentInfo.setStudentId(userInfo.getId());
+            studentInfo.setPhone(userInfo.getPhone());
+            studentInfo.setDeleted(DeleteStatusEnums.NOT_DELETE.getCode());
+            studentInfo.setCreateTime(System.currentTimeMillis());
+            studentInfo.setUpdateTime(System.currentTimeMillis());
+            studentInfoRepository.insert(studentInfo);
+        } else if (!addUserReq.getUserType().equals(userInfo.getType()) && addUserReq.getUserType()
+                .equals(UserTypeEnums.COLLEGE.getCode())) {
+            CollegeInfo collegeInfo = new CollegeInfo();
+            collegeInfo.setName(userInfo.getName());
+            collegeInfo.setCollegeId(userInfo.getId());
+            collegeInfo.setDeleted(DeleteStatusEnums.NOT_DELETE.getCode());
+            collegeInfo.setCreateTime(System.currentTimeMillis());
+            collegeInfo.setUpdateTime(System.currentTimeMillis());
+            collegeInfo.setDescription(userInfo.getDescription());
+            collegeInfoRepository.insert(collegeInfo);
+        }
         userInfo.setType(addUserReq.getUserType());
         userInfo.setName(addUserReq.getName());
         userInfo.setDescription(addUserReq.getDescription());
@@ -566,7 +598,7 @@ public class AdminService {
         }
         String finalSearch = search;
         studentInfoList.forEach(studentInfo -> {
-           StudentVo studentVo = getStudentVo(studentInfo);
+            StudentVo studentVo = getStudentVo(studentInfo);
             if (StringUtils.containsIgnoreCase(studentVo.getStudentName(), finalSearch) || StringUtils
                     .containsIgnoreCase(studentVo.getClassName(), finalSearch) || StringUtils
                     .containsIgnoreCase(studentVo.getCollegeName(), finalSearch) || StringUtils
@@ -579,7 +611,7 @@ public class AdminService {
         return RestListData.create(studentVoList.size(), studentVoList.subList(start, end));
     }
 
-    public StudentVo getStudentVo(StudentInfo studentInfo){
+    public StudentVo getStudentVo(StudentInfo studentInfo) {
         StudentVo studentVo = new StudentVo();
         studentVo.setStudentId(studentInfo.getStudentId());
         studentVo.setStudentName(studentInfo.getName());

@@ -88,7 +88,7 @@ public class AdminController {
 
     @PostMapping("user/delete")
     public RestRsp<Map<String, Object>> deleteUser(@RequestBody DeleteUserReq deleteUserReq) {
-        if (deleteUserReq.getType() == null || deleteUserReq.getType() <= 0 || deleteUserReq.getUserId() == null
+        if (deleteUserReq.getType() == null || deleteUserReq.getType() < 0 || deleteUserReq.getUserId() == null
                 || deleteUserReq.getUserId() <= 0) {
             throw ServiceException.of(ErrorCode.PARAM_INVALID, "类型或用户ID不为空");
         }
