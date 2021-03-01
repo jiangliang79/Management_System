@@ -208,10 +208,9 @@ public class AdminController {
         return RestRsp.success(adminService.deleteArticle(editArticleReq.getArticleId()));
     }
 
-    @PostMapping("article/preview")
-    public RestRsp<Map<String, Object>> previewArticle(@RequestBody EditArticleReq editArticleReq,
-            HttpServletResponse response) {
-        return adminService.previewArticle(editArticleReq, response);
+    @GetMapping("article/preview")
+    public void previewArticle(Long articleId, HttpServletResponse response) {
+        adminService.previewArticle(articleId, response);
     }
 
     @GetMapping("teacher/task/release/list")
@@ -244,8 +243,6 @@ public class AdminController {
             PageRequestParam pageRequestParam, String search) {
         return RestRsp.success(adminService.getStudentTaskList(teacherId, collegeId, pageRequestParam, search));
     }
-
-
 
 
 }

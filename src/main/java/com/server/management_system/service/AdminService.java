@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -20,8 +21,10 @@ import org.apache.commons.lang3.StringUtils;
 
 import org.jodconverter.DocumentConverter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.google.common.collect.Lists;
@@ -738,8 +741,8 @@ public class AdminService {
         return Maps.newHashMap();
     }
 
-    public RestRsp<Map<String, Object>> previewArticle(EditArticleReq editArticleReq, HttpServletResponse response) {
-        ArticleInfo articleInfo = articleInfoRepository.selectById(editArticleReq.getArticleId());
+    public void previewArticle(Long articleId, HttpServletResponse response) {
+        ArticleInfo articleInfo = articleInfoRepository.selectById(articleId);
         if (articleInfo == null) {
             throw ServiceException.of(ErrorCode.NOT_FOUNT, "文件不存在");
         }
@@ -756,16 +759,20 @@ public class AdminService {
             String suffixName = articleInfo.getPath().substring(articleInfo.getPath().lastIndexOf("."));
             converter.convert(file).to(new File(newFileMix)).execute();
             //使用response,将pdf文件以流的方式发送的前端浏览器上
+            response.setContentType("application/pdf");
+            //            response.setContentType(MediaType.ALL_VALUE);
+            response.setHeader("Content-Disposition",
+                    "inline;fileName=" + URLEncoder.encode(fileName + fileType, "UTF-8"));
             ServletOutputStream servletoutputStream = response.getOutputStream();
             InputStream in = new FileInputStream(new File(newFileMix));// 读取文件
-            int i = IOUtils.copy(in, servletoutputStream);   // copy流数据,i为字节数
+            FileCopyUtils.copy(in, servletoutputStream);
+            //int i = IOUtils.copy(in, servletoutputStream);   // copy流数据,i为字节数
             in.close();
             servletoutputStream.close();
-            log.info("流已关闭,可预览,该文件字节大小：" + i);
+            //log.info("流已关闭,可预览,该文件字节大小：" + i);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return RestRsp.success(Maps.newHashMap());
     }
 
     public RestListData<TeacherTaskReleaseVo> getTeacherReleaseList(Long teacherId, Long collegeId,

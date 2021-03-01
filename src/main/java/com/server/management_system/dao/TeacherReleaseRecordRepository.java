@@ -22,7 +22,7 @@ public interface TeacherReleaseRecordRepository extends BaseMapper<TeacherReleas
             + "item='id' open='(' separator=',' close=')'> #{id} </foreach> </script>")
     List<TeacherReleaseRecord> selectByClassIds(@Param("ids") List<Long> classIds);
 
-    @Select("select * from teacher_release_record where and deleted = 0")
+    @Select("select * from teacher_release_record where deleted = 0")
     List<TeacherReleaseRecord> selectAllList();
 
     @Select("select * from teacher_release_record where deleted = 0 and id = #{recordId} limit 1")

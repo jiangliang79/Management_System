@@ -1,6 +1,9 @@
 package com.server.management_system.config;
 
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.core.log.LogMessage;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -23,6 +26,8 @@ public class ControllerExceptionHandler {
     @ResponseBody
     @ExceptionHandler(ServiceException.class)
     public RestRsp<Object> handleException(ServiceException exception) {
+        String msg = exception.getCode() + exception.getMessage() + exception.getData();
+        log.error(msg);
         return ofMessage(exception.getCode(), exception.getMessage(), exception.getData());
     }
 
@@ -30,13 +35,15 @@ public class ControllerExceptionHandler {
     @ExceptionHandler(BindException.class)
     public RestRsp<Object> handleParameterException(BindException exception) {
         String errorMsg = "参数无效," + exception.getMessage();
+        log.error(errorMsg);
         return ofMessage(ErrorCode.PARAM_INVALID, errorMsg);
     }
 
     @ResponseBody
     @ExceptionHandler(Throwable.class)
-    public RestRsp<Object> handleAllException() {
+    public RestRsp<Object> handleAllException(HttpServletRequest request, Throwable exception) {
         String errorMsg = "系统异常";
+        log.error(errorMsg + exception.getMessage(), exception);
         return ofMessage(ErrorCode.SERVER_ERROR, errorMsg);
     }
 
