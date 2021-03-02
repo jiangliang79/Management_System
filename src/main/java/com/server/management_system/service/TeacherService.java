@@ -117,7 +117,7 @@ public class TeacherService {
             file.transferTo(dest);// 文件写入
             ArticleInfo articleInfo = new ArticleInfo();
             articleInfo.setName(fileName);
-            articleInfo.setPath("/src/main/resources/file/teacher" + teacherId.toString() + "/" + fileName);
+            articleInfo.setPath("/src/main/resources/file/teacher/" + teacherId.toString() + "/" + fileName);
             articleInfo.setDeleted(DeleteStatusEnums.NOT_DELETE.getCode());
             articleInfo.setType(type);
             articleInfo.setTemplate(TemplateEnums.NO.getCode());
