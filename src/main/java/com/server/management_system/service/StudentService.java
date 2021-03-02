@@ -141,9 +141,9 @@ public class StudentService {
         if (CollectionUtils.isEmpty(teacherClassRelationList)) {
             return RestListData.create(teacherTaskReleaseVoList.size(), teacherTaskReleaseVoList);
         }
-        teacherClassRelationList.forEach(teacherClassRelation -> {
+        for (TeacherClassRelation teacherClassRelation : teacherClassRelationList) {
             List<TeacherReleaseRecord> teacherReleaseRecordList =
-                    teacherReleaseRecordRepository.selectByTeacherId(teacherClassRelation.getClassId());
+                    teacherReleaseRecordRepository.selectByTeacherId(teacherClassRelation.getTeacherId());
             for (TeacherReleaseRecord teacherReleaseRecord : teacherReleaseRecordList) {
                 TeacherTaskReleaseVo teacherTaskReleaseVo = new TeacherTaskReleaseVo();
                 teacherTaskReleaseVo.setArticleId(teacherReleaseRecord.getArticleId());
@@ -160,7 +160,7 @@ public class StudentService {
                 }
                 teacherTaskReleaseVoList.add(teacherTaskReleaseVo);
             }
-        });
+        }
         return RestListData.create(teacherTaskReleaseVoList.size(), teacherTaskReleaseVoList);
     }
 
@@ -227,7 +227,7 @@ public class StudentService {
             }
             file.transferTo(dest);// 文件写入
             articleInfo.setName(fileName);
-            articleInfo.setPath("/src/main/resources/file/student" + studentId.toString() + "/" + fileName);
+            articleInfo.setPath("/src/main/resources/file/student/" + studentId.toString() + "/" + fileName);
             articleInfo.setDeleted(DeleteStatusEnums.NOT_DELETE.getCode());
             articleInfo.setType(ArticleTypeEnums.STUDENT.getCode());
             articleInfo.setTemplate(TemplateEnums.NO.getCode());

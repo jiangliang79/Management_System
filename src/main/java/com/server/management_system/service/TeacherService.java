@@ -199,7 +199,7 @@ public class TeacherService {
             }
             file.transferTo(dest);// 文件写入
             articleInfo.setName(fileName);
-            articleInfo.setPath("/src/main/resources/file/student" + studentId.toString() + "/" + fileName);
+            articleInfo.setPath("/src/main/resources/file/student/" + studentId.toString() + "/" + fileName);
             articleInfo.setDeleted(DeleteStatusEnums.NOT_DELETE.getCode());
             articleInfo.setType(ArticleTypeEnums.TEACHER.getCode());
             articleInfo.setTemplate(TemplateEnums.NO.getCode());
