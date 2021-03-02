@@ -1,0 +1,13 @@
+1.
+observable(value)
+@observable classProperty = value
+@observable 可以在实例字段和属性 getter 上使用。 对于对象的哪部分需要成为可观察的，@observable 提供了细粒度的控制。
+
+2.Observable 对象
+
+
+
+
+
+
+
