@@ -17,12 +17,14 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.server.management_system.constant.ErrorCode;
 import com.server.management_system.dao.ArticleInfoRepository;
+import com.server.management_system.dao.StudentGradeRecordRepository;
 import com.server.management_system.dao.StudentInfoRepository;
 import com.server.management_system.dao.StudentTaskArticleRepository;
 import com.server.management_system.dao.TeacherClassRelationRepository;
 import com.server.management_system.dao.TeacherReleaseRecordRepository;
 import com.server.management_system.dao.UserInfoRepository;
 import com.server.management_system.domain.ArticleInfo;
+import com.server.management_system.domain.StudentGradeRecord;
 import com.server.management_system.domain.StudentInfo;
 import com.server.management_system.domain.StudentTaskArticle;
 import com.server.management_system.domain.TeacherClassRelation;
@@ -58,6 +60,8 @@ public class StudentService {
     private UserInfoRepository userInfoRepository;
     @Resource
     private StudentTaskArticleRepository studentTaskArticleRepository;
+    @Resource
+    private StudentGradeRecordRepository studentGradeRecordRepository;
     @Autowired
     private AdminService adminService;
 
@@ -66,8 +70,7 @@ public class StudentService {
         if (studentInfo == null) {
             throw ServiceException.of(ErrorCode.NOT_FOUNT, "该学生不存在");
         }
-        StudentVo studentVo = adminService.getStudentVo(studentInfo);
-        return studentVo;
+        return adminService.getStudentVo(studentInfo);
     }
 
     public Map<String, Object> updateStudentInfo(StudentReq studentReq) {
@@ -77,6 +80,48 @@ public class StudentService {
         }
         studentInfo.setStudentNumber(studentReq.getStudentNumber());
         studentInfo.setClassId(studentReq.getClassId());
+        if (!studentInfo.getClassId().equals(studentReq.getClassId())) {
+            List<StudentTaskArticle> studentTaskArticleList =
+                    studentTaskArticleRepository.selectByStudentId(studentInfo.getStudentId());
+            if (!CollectionUtils.isEmpty(studentTaskArticleList)) {
+                studentTaskArticleList.forEach(studentTaskArticle -> {
+                    studentTaskArticle.setDeleted(DeleteStatusEnums.DELETED.getCode());
+                    studentTaskArticleRepository.updateById(studentTaskArticle);
+                });
+            }
+            List<TeacherReleaseRecord> teacherReleaseRecordList =
+                    teacherReleaseRecordRepository.selectByClassIds(Lists.newArrayList(studentInfo.getClassId()));
+            if (!CollectionUtils.isEmpty(teacherReleaseRecordList)) {
+                for (TeacherReleaseRecord teacherReleaseRecord : teacherReleaseRecordList) {
+                    ArticleInfo articleInfo =
+                            articleInfoRepository.selectByArticleId(teacherReleaseRecord.getArticleId());
+                    if (articleInfo == null) {
+                        continue;
+                    }
+                    StudentTaskArticle studentTaskArticle = new StudentTaskArticle();
+                    studentTaskArticle.setArticleId(articleInfo.getId());
+                    studentTaskArticle.setClassId(studentInfo.getClassId());
+                    studentTaskArticle.setStudentId(studentInfo.getStudentId());
+                    studentTaskArticle.setTeacherId(teacherReleaseRecord.getTeacherId());
+                    studentTaskArticle.setUpdateTime(System.currentTimeMillis());
+                    studentTaskArticle.setCreateTime(System.currentTimeMillis());
+                    studentTaskArticle.setDeleted(DeleteStatusEnums.DELETED.getCode());
+                    studentTaskArticle.setStatus(StudentTaskStatusEnums.UNKNOWN.getCode());
+                    studentTaskArticle.setRemark(StringUtils.EMPTY);
+                    if (articleInfo.getType().equals(ArticleTypeEnums.STUDENT.getCode())) {
+                        studentTaskArticleRepository.insert(studentTaskArticle);
+                    }
+                }
+            }
+            List<StudentGradeRecord> studentGradeRecordList =
+                    studentGradeRecordRepository.selectByStudentId(studentInfo.getStudentId());
+            if (!CollectionUtils.isEmpty(studentGradeRecordList)) {
+                studentGradeRecordList.forEach(studentGradeRecord -> {
+                    studentGradeRecord.setDeleted(DeleteStatusEnums.DELETED.getCode());
+                    studentGradeRecordRepository.updateById(studentGradeRecord);
+                });
+            }
+        }
         studentInfo.setName(studentReq.getStudentName());
         studentInfo.setNativePlace(studentReq.getNativePlace());
         studentInfo.setNowPlace(studentReq.getNowPlace());

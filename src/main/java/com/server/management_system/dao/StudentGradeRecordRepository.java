@@ -24,6 +24,9 @@ public interface StudentGradeRecordRepository extends BaseMapper<StudentGradeRec
     @Select("select * from student_grade_record where teacher_id = #{teacherId} and deleted = 0")
     List<StudentGradeRecord> selectByTeacherId(@Param("teacherId") Long teacherId);
 
+    @Select("select * from student_grade_record where student_id = #{studentId} and deleted = 0")
+    List<StudentGradeRecord> selectByStudentId(@Param("studentId") Long studentId);
+
     @Select("<script> select * from student_grade_record where deleted = 0 and class_id in <foreach collection ='ids' "
             + "item='id' open='(' separator=',' close=')'> #{id} </foreach> </script>")
     List<StudentGradeRecord> selectByClassIds(@Param("ids") List<Long> classIds);
