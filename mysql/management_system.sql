@@ -170,3 +170,31 @@ create table student_task_article
     DEFAULT CHARSET = utf8mb4
     COLLATE = utf8mb4_bin COMMENT = '学生任务表';
 
+create table student_grade
+(
+    id             bigint unsigned not null auto_increment comment '自增ID',
+    student_name   varchar(256)    not null default ''      comment '学生姓名',
+    grade          double          not null default 0      comment '学生成绩',
+    deleted        int             not null default 0      comment '是否删除,1已删除，0未删除',
+    create_time    bigint          not null default 0      comment '创建时间',
+    update_time    bigint          not null default 0      comment '修改时间',
+    PRIMARY KEY (id)
+)
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_bin COMMENT = '数据分析学生成绩表';
+
+create table student_attendance
+(
+    id                  bigint unsigned not null auto_increment comment '自增ID',
+    student_name        varchar(256)    not null default ''    comment '学生姓名',
+    attendance          double          not null default 0      comment '学生出勤率',
+    deleted             int             not null default 0      comment '是否删除,1已删除，0未删除',
+    create_time         bigint          not null default 0      comment '创建时间',
+    update_time         bigint          not null default 0      comment '修改时间',
+    PRIMARY KEY (id)
+)
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_bin COMMENT = '数据分析学生出勤率表';
+

@@ -34,7 +34,9 @@ import com.server.management_system.dao.ArticleInfoRepository;
 import com.server.management_system.dao.ClassInfoRepository;
 import com.server.management_system.dao.CollegeInfoRepository;
 import com.server.management_system.dao.ProfessionInfoRepository;
+import com.server.management_system.dao.StudentAttendanceRepository;
 import com.server.management_system.dao.StudentGradeRecordRepository;
+import com.server.management_system.dao.StudentGradeRepository;
 import com.server.management_system.dao.StudentInfoRepository;
 import com.server.management_system.dao.StudentTaskArticleRepository;
 import com.server.management_system.dao.TeacherClassRelationRepository;
@@ -44,6 +46,8 @@ import com.server.management_system.domain.ArticleInfo;
 import com.server.management_system.domain.ClassInfo;
 import com.server.management_system.domain.CollegeInfo;
 import com.server.management_system.domain.ProfessionInfo;
+import com.server.management_system.domain.StudentAttendance;
+import com.server.management_system.domain.StudentGrade;
 import com.server.management_system.domain.StudentGradeRecord;
 import com.server.management_system.domain.StudentInfo;
 import com.server.management_system.domain.StudentTaskArticle;
@@ -108,6 +112,10 @@ public class AdminService {
     private DocumentConverter converter;
     @Resource
     private StudentGradeRecordRepository studentGradeRecordRepository;
+    @Resource
+    private StudentGradeRepository studentGradeRepository;
+    @Resource
+    private StudentAttendanceRepository studentAttendanceRepository;
 
     public Map<String, Object> addUser(AddUserReq addUserReq) {
         UserInfo userInfo = new UserInfo();
@@ -1024,6 +1032,96 @@ public class AdminService {
             studentTaskArticleVo.setClassName(classInfo.getName());
         }
         return studentTaskArticleVo;
+    }
+
+    public RestListData<Map<String, Object>> getStudentAttendance() {
+        List<Map<String, Object>> mapList = Lists.newArrayList();
+        List<StudentAttendance> studentAttendances = studentAttendanceRepository.selectListAll();
+        int overNinety = 0;
+        int overEight = 0;
+        int overSixty = 0;
+        int blowSixty = 0;
+        if (!CollectionUtils.isEmpty(studentAttendances)) {
+            for (StudentAttendance studentAttendance : studentAttendances) {
+                if (studentAttendance.getAttendance() >= 90) {
+                    overNinety++;
+                } else if (studentAttendance.getAttendance() >= 80 && studentAttendance.getAttendance() < 90) {
+                    overEight++;
+                } else if (studentAttendance.getAttendance() >= 60 && studentAttendance.getAttendance() < 80) {
+                    overSixty++;
+                } else {
+                    blowSixty++;
+                }
+            }
+        }
+        Map<String, Object> overNinetyMap = Maps.newHashMap();
+        overNinetyMap.put("出勤率90%及以上", overNinety);
+        mapList.add(overNinetyMap);
+        Map<String, Object> overEightMap = Maps.newHashMap();
+        overEightMap.put("出勤率在80%-90%", overEight);
+        mapList.add(overEightMap);
+        Map<String, Object> overSixtyMap = Maps.newHashMap();
+        overSixtyMap.put("出勤率在60%-80%", overSixty);
+        mapList.add(overSixtyMap);
+        Map<String, Object> blowSixtyMap = Maps.newHashMap();
+        blowSixtyMap.put("出勤率在60%以下", blowSixty);
+        mapList.add(blowSixtyMap);
+        return RestListData.create(mapList.size(), mapList);
+    }
+
+    public RestListData<Map<String, Object>> getStudentGrade() {
+        List<Map<String, Object>> mapList = Lists.newArrayList();
+        List<StudentGrade> studentGrades = studentGradeRepository.selectListAll();
+        int overNinety = 0;
+        int overEight = 0;
+        int overSixty = 0;
+        int blowSixty = 0;
+        if (!CollectionUtils.isEmpty(studentGrades)) {
+            for (StudentGrade studentGrade : studentGrades) {
+                if (studentGrade.getGrade() >= 90) {
+                    overNinety++;
+                } else if (studentGrade.getGrade() >= 80 && studentGrade.getGrade() < 90) {
+                    overEight++;
+                } else if (studentGrade.getGrade() >= 60 && studentGrade.getGrade() < 80) {
+                    overSixty++;
+                } else {
+                    blowSixty++;
+                }
+            }
+        }
+        Map<String, Object> overNinetyMap = Maps.newHashMap();
+        overNinetyMap.put("优秀(90分及以上)", overNinety);
+        mapList.add(overNinetyMap);
+        Map<String, Object> overEightMap = Maps.newHashMap();
+        overEightMap.put("良好(80分-90分)", overEight);
+        mapList.add(overEightMap);
+        Map<String, Object> overSixtyMap = Maps.newHashMap();
+        overSixtyMap.put("及格(60分-80分)", overSixty);
+        mapList.add(overSixtyMap);
+        Map<String, Object> blowSixtyMap = Maps.newHashMap();
+        blowSixtyMap.put("不及格(60分以下)", blowSixty);
+        mapList.add(blowSixtyMap);
+        return RestListData.create(mapList.size(), mapList);
+    }
+
+    public RestListData<Map<String, Object>> getStudentAttendanceRelation() {
+        List<Map<String, Object>> mapList = Lists.newArrayList();
+        List<StudentAttendance> studentAttendances = studentAttendanceRepository.selectListAll();
+        List<StudentGrade> studentGrades = studentGradeRepository.selectListAll();
+        if (!CollectionUtils.isEmpty(studentAttendances) && !CollectionUtils.isEmpty(studentGrades)) {
+            for (StudentAttendance studentAttendance : studentAttendances) {
+                Map<String, Object> objectMap = Maps.newHashMap();
+                for (StudentGrade studentGrade : studentGrades) {
+                    if (studentGrade.getStudentName().equals(studentAttendance.getStudentName())) {
+                        objectMap.put("grade", studentGrade.getGrade());
+                        objectMap.put("attendance", studentAttendance.getAttendance() * 100 + "%");
+                        mapList.add(objectMap);
+                        break;
+                    }
+                }
+            }
+        }
+        return RestListData.create(mapList.size(), mapList);
     }
 
 }

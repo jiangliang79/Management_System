@@ -244,5 +244,19 @@ public class AdminController {
         return RestRsp.success(adminService.getStudentTaskList(teacherId, collegeId, pageRequestParam, search));
     }
 
+    @GetMapping("get/student/attendance")
+    public RestRsp<RestListData<Map<String, Object>>> getStudentAttendance() {
+        return RestRsp.success(adminService.getStudentAttendance());
+    }
+
+    @GetMapping("get/student/grade")
+    public RestRsp<RestListData<Map<String, Object>>> getStudentGrade() {
+        return RestRsp.success(adminService.getStudentGrade());
+    }
+
+    @GetMapping("get/student/attendance/grade/relation")
+    public RestRsp<RestListData<Map<String, Object>>> getStudentAttendanceRelation() {
+        return RestRsp.success(adminService.getStudentAttendanceRelation());
+    }
 
 }
