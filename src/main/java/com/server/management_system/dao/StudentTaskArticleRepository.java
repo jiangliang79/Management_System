@@ -28,7 +28,7 @@ public interface StudentTaskArticleRepository extends BaseMapper<StudentTaskArti
     @Select("select * from student_task_article where teacher_id = #{teacherId} and deleted = 0 and status in(0,1)")
     List<StudentTaskArticle> selectByTeacherId(@Param("teacherId") Long teacherId);
 
-    @Select("<script> select * from student_task_article where deleted = 0 and class_id in <foreach collection ='ids' "
+    @Select("<script> select * from student_task_article where deleted = 0 and status in(0,1) and class_id in <foreach collection ='ids' "
             + "item='id' open='(' separator=',' close=')'> #{id} </foreach> </script>")
     List<StudentTaskArticle> selectByClassIds(@Param("ids") List<Long> classIds);
 

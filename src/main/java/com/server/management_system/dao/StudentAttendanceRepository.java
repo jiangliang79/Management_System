@@ -14,6 +14,6 @@ import com.server.management_system.domain.StudentAttendance;
  */
 @Mapper
 public interface StudentAttendanceRepository extends BaseMapper<StudentAttendance> {
-    @Select("select * from student_grade where deleted = 0")
+    @Select("select * from student_attendance where deleted = 0")
     List<StudentAttendance> selectListAll();
 }

@@ -1104,24 +1104,24 @@ public class AdminService {
         return RestListData.create(mapList.size(), mapList);
     }
 
-    public RestListData<Map<String, Object>> getStudentAttendanceRelation() {
-        List<Map<String, Object>> mapList = Lists.newArrayList();
+    public RestListData<List<Double>> getStudentAttendanceRelation() {
+        List<List<Double>> list = Lists.newArrayList();
         List<StudentAttendance> studentAttendances = studentAttendanceRepository.selectListAll();
         List<StudentGrade> studentGrades = studentGradeRepository.selectListAll();
         if (!CollectionUtils.isEmpty(studentAttendances) && !CollectionUtils.isEmpty(studentGrades)) {
             for (StudentAttendance studentAttendance : studentAttendances) {
-                Map<String, Object> objectMap = Maps.newHashMap();
+                List<Double> integerList = Lists.newArrayList();
                 for (StudentGrade studentGrade : studentGrades) {
                     if (studentGrade.getStudentName().equals(studentAttendance.getStudentName())) {
-                        objectMap.put("grade", studentGrade.getGrade());
-                        objectMap.put("attendance", studentAttendance.getAttendance() * 100 + "%");
-                        mapList.add(objectMap);
+                        integerList.add(studentAttendance.getAttendance());
+                        integerList.add(studentGrade.getGrade());
+                        list.add(integerList);
                         break;
                     }
                 }
             }
         }
-        return RestListData.create(mapList.size(), mapList);
+        return RestListData.create(list.size(), list);
     }
 
 }

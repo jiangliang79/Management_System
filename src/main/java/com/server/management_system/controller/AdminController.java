@@ -1,5 +1,6 @@
 package com.server.management_system.controller;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
@@ -238,6 +239,9 @@ public class AdminController {
         return RestRsp.success(adminService.articleDownload(articleId, response));
     }
 
+    /*
+    批阅查看以及下载接口
+     */
     @GetMapping("student/task/article/list")
     public RestRsp<RestListData<StudentTaskArticleVo>> getStudentTaskList(Long teacherId, Long collegeId,
             PageRequestParam pageRequestParam, String search) {
@@ -255,7 +259,7 @@ public class AdminController {
     }
 
     @GetMapping("get/student/attendance/grade/relation")
-    public RestRsp<RestListData<Map<String, Object>>> getStudentAttendanceRelation() {
+    public RestRsp<RestListData<List<Double>>> getStudentAttendanceRelation() {
         return RestRsp.success(adminService.getStudentAttendanceRelation());
     }
 
