@@ -188,8 +188,8 @@ public class AdminController {
     }
 
     @PostMapping("article/upload")
-    public RestRsp<Map<String, Object>> uploadFile(@RequestParam("file") MultipartFile file) {
-        return adminService.uploadFile(file);
+    public RestRsp<Map<String, Object>> uploadFile(@RequestParam("file") MultipartFile file, Integer type) {
+        return adminService.uploadFile(file, type);
     }
 
     @PostMapping("article/edit")

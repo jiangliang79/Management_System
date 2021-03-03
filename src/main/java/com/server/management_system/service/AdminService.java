@@ -685,7 +685,7 @@ public class AdminService {
         return RestListData.create(articleVoList.size(), articleVoList.subList(start, end));
     }
 
-    public RestRsp<Map<String, Object>> uploadFile(MultipartFile file) {
+    public RestRsp<Map<String, Object>> uploadFile(MultipartFile file, Integer type) {
         Map<String, Object> objectMap = Maps.newHashMap();
         try {
             if (file.isEmpty()) {
@@ -716,6 +716,9 @@ public class AdminService {
             articleInfo.setStartTime(System.currentTimeMillis());
             articleInfo.setEndTime(System.currentTimeMillis());
             articleInfoRepository.insert(articleInfo);
+            if (type != null) {
+                //todo 存储数据库
+            }
             return RestRsp.success(objectMap);
         } catch (Exception e) {
             e.printStackTrace();
@@ -1055,16 +1058,20 @@ public class AdminService {
             }
         }
         Map<String, Object> overNinetyMap = Maps.newHashMap();
-        overNinetyMap.put("出勤率90%及以上", overNinety);
+        overNinetyMap.put("name", "出勤率90%及以上");
+        overNinetyMap.put("value", overNinety);
         mapList.add(overNinetyMap);
         Map<String, Object> overEightMap = Maps.newHashMap();
-        overEightMap.put("出勤率在80%-90%", overEight);
+        overEightMap.put("name", "出勤率在80%-90%");
+        overEightMap.put("value", overEight);
         mapList.add(overEightMap);
         Map<String, Object> overSixtyMap = Maps.newHashMap();
-        overSixtyMap.put("出勤率在60%-80%", overSixty);
+        overSixtyMap.put("name", "出勤率在60%-80%");
+        overSixtyMap.put("value", overSixty);
         mapList.add(overSixtyMap);
         Map<String, Object> blowSixtyMap = Maps.newHashMap();
-        blowSixtyMap.put("出勤率在60%以下", blowSixty);
+        blowSixtyMap.put("name", "出勤率在60%以下");
+        blowSixtyMap.put("value", blowSixty);
         mapList.add(blowSixtyMap);
         return RestListData.create(mapList.size(), mapList);
     }
@@ -1090,16 +1097,20 @@ public class AdminService {
             }
         }
         Map<String, Object> overNinetyMap = Maps.newHashMap();
-        overNinetyMap.put("优秀(90分及以上)", overNinety);
+        overNinetyMap.put("name", "优秀(90分及以上)");
+        overNinetyMap.put("value", overNinety);
         mapList.add(overNinetyMap);
         Map<String, Object> overEightMap = Maps.newHashMap();
-        overEightMap.put("良好(80分-90分)", overEight);
+        overEightMap.put("name", "良好(80分-90分)");
+        overEightMap.put("value", overEight);
         mapList.add(overEightMap);
         Map<String, Object> overSixtyMap = Maps.newHashMap();
-        overSixtyMap.put("及格(60分-80分)", overSixty);
+        overSixtyMap.put("name", "及格(60分-80分)");
+        overSixtyMap.put("value", overSixty);
         mapList.add(overSixtyMap);
         Map<String, Object> blowSixtyMap = Maps.newHashMap();
-        blowSixtyMap.put("不及格(60分以下)", blowSixty);
+        blowSixtyMap.put("name", "不及格(60分以下)");
+        blowSixtyMap.put("value", blowSixty);
         mapList.add(blowSixtyMap);
         return RestListData.create(mapList.size(), mapList);
     }
