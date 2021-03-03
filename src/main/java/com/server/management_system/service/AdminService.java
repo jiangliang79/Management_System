@@ -1046,11 +1046,11 @@ public class AdminService {
         int blowSixty = 0;
         if (!CollectionUtils.isEmpty(studentAttendances)) {
             for (StudentAttendance studentAttendance : studentAttendances) {
-                if (studentAttendance.getAttendance() >= 90) {
+                if (studentAttendance.getAttendance() >= 0.9) {
                     overNinety++;
-                } else if (studentAttendance.getAttendance() >= 80 && studentAttendance.getAttendance() < 90) {
+                } else if (studentAttendance.getAttendance() >= 0.8 && studentAttendance.getAttendance() < 0.9) {
                     overEight++;
-                } else if (studentAttendance.getAttendance() >= 60 && studentAttendance.getAttendance() < 80) {
+                } else if (studentAttendance.getAttendance() >= 0.6 && studentAttendance.getAttendance() < 0.8) {
                     overSixty++;
                 } else {
                     blowSixty++;
