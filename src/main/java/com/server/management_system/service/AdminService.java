@@ -16,6 +16,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 
 
@@ -626,7 +627,9 @@ public class AdminService {
         StudentVo studentVo = new StudentVo();
         studentVo.setStudentId(studentInfo.getStudentId());
         studentVo.setStudentName(studentInfo.getName());
-        studentVo.setStudentNumber(studentInfo.getStudentNumber());
+        if (studentInfo.getStudentNumber() != 0) {
+            studentVo.setStudentNumber(studentInfo.getStudentNumber());
+        }
         studentVo.setNativePlace(studentInfo.getNativePlace());
         studentVo.setNowPlace(studentInfo.getNowPlace());
         studentVo.setSex(studentInfo.getSex());
@@ -649,7 +652,7 @@ public class AdminService {
         List<StudentTaskArticle> studentTaskArticleList =
                 studentTaskArticleRepository.selectByStudentId(studentInfo.getStudentId());
         if (CollectionUtils.isEmpty(studentTaskArticleList)) {
-            studentVo.setStatus(1);
+            studentVo.setStatus(0);
         } else {
             studentVo.setStatus(1);
             studentTaskArticleList.forEach(studentTaskArticle -> {
@@ -673,7 +676,9 @@ public class AdminService {
             ArticleVo articleVo = new ArticleVo();
             articleVo.setArticleId(articleInfo.getId());
             articleVo.setArticleName(articleInfo.getName());
-            articleVo.setArticleType(articleInfo.getType());
+            if (articleInfo.getType() != 0) {
+                articleVo.setArticleType(articleInfo.getType());
+            }
             articleVo.setStartTime(articleInfo.getStartTime());
             articleVo.setEndTime(articleInfo.getEndTime());
             if (StringUtils.containsIgnoreCase(articleVo.getArticleName(), search)) {
@@ -1133,6 +1138,36 @@ public class AdminService {
             }
         }
         return RestListData.create(list.size(), list);
+    }
+
+    public void insert() {
+        for (int i = 0; i < 100; i++) {
+            StudentAttendance studentAttendance = new StudentAttendance();
+            studentAttendance.setAttendance(0.5 + RandomUtils.nextDouble(0, 1));
+            if (studentAttendance.getAttendance() > 1) {
+                studentAttendance.setAttendance(1.0 - RandomUtils.nextDouble(0, 0.2) + RandomUtils.nextDouble(0, 0.2));
+            }
+            if (studentAttendance.getAttendance() > 1) {
+                studentAttendance.setAttendance(1.0);
+            }
+            studentAttendance.setStudentName(String.valueOf(i));
+            studentAttendance.setCreateTime(System.currentTimeMillis());
+            studentAttendance.setUpdateTime(System.currentTimeMillis());
+            studentAttendance.setDeleted(DeleteStatusEnums.NOT_DELETE.getCode());
+            StudentGrade studentGrade = new StudentGrade();
+            studentGrade.setGrade(
+                    studentAttendance.getAttendance() * 100 - RandomUtils.nextInt(0, 20) + RandomUtils.nextInt(0, 20));
+            studentGrade.setCreateTime(System.currentTimeMillis());
+            if (studentGrade.getGrade() > 100) {
+                studentGrade.setGrade(100.0);
+            }
+            studentGrade.setUpdateTime(System.currentTimeMillis());
+            studentGrade.setDeleted(DeleteStatusEnums.NOT_DELETE.getCode());
+            studentGrade.setStudentName(String.valueOf(i));
+            studentGradeRepository.insert(studentGrade);
+            studentAttendanceRepository.insert(studentAttendance);
+        }
+
     }
 
 }

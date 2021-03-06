@@ -35,7 +35,6 @@ create table college_info
     DEFAULT CHARSET = utf8mb4
     COLLATE = utf8mb4_bin COMMENT = '学院信息表';
 
-alter table  college_info add(college_id  bigint          not null default 0  comment '学院ID')
 
 create table profession_info
 (

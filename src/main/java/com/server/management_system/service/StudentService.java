@@ -158,7 +158,9 @@ public class StudentService {
                 if (userInfo != null) {
                     teacherTaskReleaseVo.setTeacherName(userInfo.getName());
                 }
-                teacherTaskReleaseVoList.add(teacherTaskReleaseVo);
+                if (articleInfo != null && articleInfo.getType().equals(ArticleTypeEnums.TASK.getCode())) {
+                    teacherTaskReleaseVoList.add(teacherTaskReleaseVo);
+                }
             }
         }
         return RestListData.create(teacherTaskReleaseVoList.size(), teacherTaskReleaseVoList);

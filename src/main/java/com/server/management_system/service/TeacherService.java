@@ -150,7 +150,7 @@ public class TeacherService {
                         studentTaskArticle.setTeacherId(teacherId);
                         studentTaskArticle.setCreateTime(System.currentTimeMillis());
                         studentTaskArticle.setUpdateTime(System.currentTimeMillis());
-                        studentTaskArticle.setDeleted(DeleteStatusEnums.DELETED.getCode());
+                        studentTaskArticle.setDeleted(DeleteStatusEnums.NOT_DELETE.getCode());
                         studentTaskArticle.setStatus(StudentTaskStatusEnums.UNKNOWN.getCode());
                         studentTaskArticle.setRemark(StringUtils.EMPTY);
                         if (articleInfo.getType().equals(ArticleTypeEnums.STUDENT.getCode())) {
@@ -171,7 +171,11 @@ public class TeacherService {
         if (studentTaskArticle == null) {
             throw ServiceException.of(ErrorCode.NOT_FOUNT, "该任务不存在");
         }
-        studentTaskArticle.setStatus(status);
+        if (status == 0) {
+            studentTaskArticle.setStatus(StudentTaskStatusEnums.SUCCESS.getCode());
+        } else {
+            studentTaskArticle.setStatus(StudentTaskStatusEnums.FAIL.getCode());
+        }
         if (StringUtils.isNotEmpty(remark)) {
             studentTaskArticle.setRemark(remark);
         }
@@ -239,7 +243,6 @@ public class TeacherService {
                     .containsIgnoreCase(studentTaskArticleVo.getStudentName(), search)) {
                 studentTaskArticleVoList.add(studentTaskArticleVo);
             }
-            studentTaskArticleVoList.add(studentTaskArticleVo);
         }
         int start = pageRequestParam.getStart();
         int end = Math.min(start + pageRequestParam.getPageSize(), studentTaskArticleVoList.size());
