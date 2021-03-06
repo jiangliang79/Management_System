@@ -3,8 +3,8 @@ create table user_info
     id          bigint unsigned not null auto_increment comment '用户ID',
     username    varchar(128)    not null default '' comment '用户名',
     password    varchar(128)    not null default '' comment '密码',
-    token       varchar(256)    not null default '' comment '用户token',
-    name        varchar(256)    not null default '' comment '昵称',
+    token       varchar(255)    not null default '' comment '用户token',
+    name        varchar(255)    not null default '' comment '昵称',
     phone       bigint          not null default 0 comment '联系方式',
     type        int             not null default 0  comment '用户类型：1：学生，2：老师，3：二级学院，0：超级管理员',
     description varchar(1024)   not null default '' comment '备注',
@@ -110,8 +110,8 @@ create table student_info
 create table article_info
 (
     id             bigint unsigned not null auto_increment comment '文档ID',
-    name           varchar(256)    not null default 0      comment '文档名称',
-    path           varchar(256)    not null default ''     comment '文件路径',
+    name           varchar(255)    not null default 0      comment '文档名称',
+    path           varchar(255)    not null default ''     comment '文件路径',
     type           int             not null default 0     comment '文档类型，1:老师评分表，2:学生填写表，3:实习任务表',
     template       int             not null default 0      comment '是否是模板，1：是，0：否',
     start_time     bigint          not null default 0      comment '开始时间',
@@ -173,7 +173,7 @@ create table student_task_article
 create table student_grade
 (
     id             bigint unsigned not null auto_increment comment '自增ID',
-    student_name   varchar(256)    not null default ''      comment '学生姓名',
+    student_name   varchar(255)    not null default ''      comment '学生姓名',
     grade          double          not null default 0      comment '学生成绩',
     deleted        int             not null default 0      comment '是否删除,1已删除，0未删除',
     create_time    bigint          not null default 0      comment '创建时间',
@@ -187,7 +187,7 @@ create table student_grade
 create table student_attendance
 (
     id                  bigint unsigned not null auto_increment comment '自增ID',
-    student_name        varchar(256)    not null default ''    comment '学生姓名',
+    student_name        varchar(255)    not null default ''    comment '学生姓名',
     attendance          double          not null default 0      comment '学生出勤率',
     deleted             int             not null default 0      comment '是否删除,1已删除，0未删除',
     create_time         bigint          not null default 0      comment '创建时间',
