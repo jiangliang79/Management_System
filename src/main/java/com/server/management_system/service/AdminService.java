@@ -315,7 +315,7 @@ public class AdminService {
             professionVo.setCollegeName(collegeInfo.getName());
             professionVo.setCreateTime(System.currentTimeMillis());
             professionVo.setUpdateTime(System.currentTimeMillis());
-            professionVo.setDescription(StringUtils.EMPTY);
+            professionVo.setDescription(professionInfo.getDescription());
             if (StringUtils.containsIgnoreCase(professionVo.getCollegeName(), search) || StringUtils
                     .containsIgnoreCase(professionVo.getProfessionName(), search)) {
                 professionVoList.add(professionVo);
